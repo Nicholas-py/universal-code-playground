@@ -4,9 +4,8 @@ import { interpret, type UniversalEntry } from "./universal-interpreter";
 /**
  * Thin worker wrapper around the Universal interpreter.
  *
- * The canonical language definition lives in `universal_interpreter.py`.
  * The actual per-request execution is delegated to `./universal-interpreter.ts`,
- * which is a direct port of that Python file. This module only owns:
+ * This module only owns:
  *   - the in-memory cloud store
  *   - HTTP/RPC plumbing (createServerFn)
  *   - input validation

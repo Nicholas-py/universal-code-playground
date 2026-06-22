@@ -1,9 +1,9 @@
 /**
- * Universal interpreter — TypeScript port of `universal_interpreter.py`.
+ * Universal interpreter — Written in ts, sadly
  *
- * The Python file is the source of truth for language semantics. This port
+ * This port
  * exists only because the Cloudflare Worker runtime can't execute Python at
- * request time. Keep the two in sync: change Python first, then mirror here.
+ * request time. 
  */
 
 export type UniversalEntry = { value: string; updatedAt: number };
@@ -91,6 +91,8 @@ export function interpret(source: string, universalStore: Store): InterpretResul
 
     stderr += `line ${lineNo}: unknown statement: ${raw}\n`;
     exitCode = 1;
+    return { stdout, stderr, exitCode };
+
   }
 
   return { stdout, stderr, exitCode };
