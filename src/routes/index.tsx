@@ -6,13 +6,13 @@ import { runUniversal } from "@/lib/universal-run.functions";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Universal — Programming but better" },
+      { title: "Universal — Programming, but better" },
       {
         name: "description",
         content:
           "Universal is a small, customizable programming language. Try it instantly in your browser.",
       },
-      { property: "og:title", content: "Universal — Programming but better" },
+      { property: "og:title", content: "Universal — Programming, but better" },
       {
         property: "og:description",
         content: "Write and run universal code right in your browser.",
@@ -67,17 +67,13 @@ function Home() {
       <Header />
       <main className="mx-auto w-full max-w-6xl px-6 pb-24 pt-12 md:pt-20">
         <section className="mb-12 max-w-3xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            v0.1 · early preview
-          </div>
           <h1 className="font-serif text-6xl leading-[1.05] tracking-tight text-foreground md:text-7xl">
             Universal<span className="text-primary">.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Universal is cloud-synced — your data is literally impossible to lose. The syntax is clean, 
-            with few special characters to memorize, and the
-            language is 100% customizable, giving you unprecedented power over your code.
+            Be part of a revolution in programming, with Universal. With next to no special characters,
+            cloud-synced data and 100% customization, Universal gives you unprecendented power over
+            your code, without sacrificing readability or ease of use. 
           </p>
         </section>
 
@@ -108,7 +104,15 @@ function Header() {
           <a className="transition-colors hover:text-foreground" href="#playground">
             Playground
           </a>
-          
+            <a
+            className="transition-colors hover:text-foreground"
+            href="https://github.com/Nicholas-py/universal-code-playground"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Docs
+          </a>
+
           <a
             className="transition-colors hover:text-foreground"
             href="https://github.com/Nicholas-py/universal-code-playground"
@@ -138,18 +142,18 @@ function Logo() {
         textAnchor="middle"
         fontFamily="ui-serif, Georgia, 'Times New Roman', serif"
         fontSize="17"
-        fontWeight="500"
+        fontWeight="1000"
         fill="var(--primary)"
       >
         U
       </text>
       <line
-        x1="7"
-        y1="9.1"
-        x2="17"
-        y2="14.9"
+        x1="6"
+        y1="14.9"
+        x2="19"
+        y2="10.5"
         stroke="var(--primary)"
-        strokeWidth="1.75"
+        strokeWidth="2.5"
         strokeLinecap="round"
       />
     </svg>
@@ -315,7 +319,7 @@ function Footer() {
           <Logo />
           <span className="font-serif">Universal</span>
           <span>·</span>
-          <span>Programming but better.</span>
+          <span>Programming, but better.</span>
         </div>
         <div>© {new Date().getFullYear()} Nicholas Waslander.</div>
       </div>
