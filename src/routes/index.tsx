@@ -121,9 +121,70 @@ function Home() {
           result={result}
         />
 
+        <CloudPanel entries={cloud} onClear={handleClearCloud} onRefresh={refreshCloud} />
+
       </main>
       <Footer />
     </div>
+  );
+}
+
+function CloudPanel({
+  entries,
+  onClear,
+  onRefresh,
+}: {
+  entries: CloudEntry[];
+  onClear: () => void;
+  onRefresh: () => void;
+}) {
+  return (
+    <section
+      className="mt-8 overflow-hidden rounded-2xl border border-border bg-card"
+      style={{ boxShadow: "var(--shadow-elegant)" }}
+    >
+      <div className="flex items-center justify-between border-b border-border bg-secondary/40 px-4 py-2.5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+          <span className="font-mono">cloud · universal store</span>
+          <span className="ml-2">shared across every visitor</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRefresh}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            Refresh
+          </button>
+          <button
+            onClick={onClear}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            Clear cloud
+          </button>
+        </div>
+      </div>
+      <div className="px-4 py-4">
+        {entries.length === 0 ? (
+          <p className="font-mono text-sm text-muted-foreground">
+            (empty) — run <span className="text-foreground">save universal name = "value"</span> to add one.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {entries.map((e) => (
+              <li key={e.name} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
+                <span className="text-foreground">
+                  <span className="text-primary">{e.name}</span> = "{e.value}"
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(e.updatedAt).toLocaleTimeString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
 
