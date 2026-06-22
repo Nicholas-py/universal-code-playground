@@ -1,30 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
+import { interpret, type UniversalEntry } from "./universal-interpreter";
 
 /**
- * Demo interpreter for Universal.
+ * Thin worker wrapper around the Universal interpreter.
  *
- * Supports:
- *   print "hello"             // string literal
- *   print name                // variable lookup (local first, then universal)
- *   save name = "value"       // local to this run
- *   save universal name = "value"   // cloud-synced, shared across ALL users
- *   list universal            // dump the cloud-synced store
- *
- * The "universal" store is an in-memory Map on the server. It persists
- * across runs and is shared across every visitor hitting the same worker
- * instance — enough to demo the cloud-sync idea.
+ * The canonical language definition lives in `universal_interpreter.py`.
+ * The actual per-request execution is delegated to `./universal-interpreter.ts`,
+ * which is a direct port of that Python file. This module only owns:
+ *   - the in-memory cloud store
+ *   - HTTP/RPC plumbing (createServerFn)
+ *   - input validation
  */
 
-type UniversalEntry = { value: string; updatedAt: number };
 const universalStore = new Map<string, UniversalEntry>();
-
-function parseValue(raw: string): string | null {
-  const s = raw.trim();
-  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
-    return s.slice(1, -1);
-  }
-  return null;
-}
 
 export const runUniversal = createServerFn({ method: "POST" })
   .inputValidator((input: { source: string }) => {
@@ -34,79 +22,7 @@ export const runUniversal = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const start = Date.now();
-    let stdout = "";
-    let stderr = "";
-    let exitCode = 0;
-    const locals = new Map<string, string>();
-
-    const lines = data.source.split("\n");
-    lines.forEach((raw, i) => {
-      const line = raw.trim();
-      if (!line || line.startsWith("#")) return;
-
-      // list universal
-      if (line === "list universal") {
-        if (universalStore.size === 0) {
-          stdout += "(cloud store is empty)\n";
-        } else {
-          for (const [k, v] of universalStore) stdout += `${k} = "${v.value}"\n`;
-        }
-        return;
-      }
-
-      // save [universal] name = "value"
-      if (line.startsWith("save ")) {
-        let rest = line.slice("save ".length).trim();
-        const isUniversal = rest.startsWith("universal ");
-        if (isUniversal) rest = rest.slice("universal ".length).trim();
-        const eq = rest.indexOf("=");
-        if (eq === -1) {
-          stderr += `line ${i + 1}: save needs '=': ${raw}\n`;
-          exitCode = 1;
-          return;
-        }
-        const name = rest.slice(0, eq).trim();
-        const value = parseValue(rest.slice(eq + 1));
-        if (!name || value === null) {
-          stderr += `line ${i + 1}: invalid save: ${raw}\n`;
-          exitCode = 1;
-          return;
-        }
-        if (isUniversal) {
-          universalStore.set(name, { value, updatedAt: Date.now() });
-        } else {
-          locals.set(name, value);
-        }
-        return;
-      }
-
-      // print ...
-      if (line.startsWith("print")) {
-        let rest = line.slice("print".length).trim();
-        if (rest.startsWith("(") && rest.endsWith(")")) rest = rest.slice(1, -1).trim();
-        const literal = parseValue(rest);
-        if (literal !== null) {
-          stdout += literal + "\n";
-        } else if (rest) {
-          // variable lookup: locals first, then universal
-          if (locals.has(rest)) {
-            stdout += locals.get(rest)! + "\n";
-          } else if (universalStore.has(rest)) {
-            stdout += universalStore.get(rest)!.value + "\n";
-          } else {
-            stderr += `line ${i + 1}: undefined name: ${rest}\n`;
-            exitCode = 1;
-          }
-        } else {
-          stdout += "\n";
-        }
-        return;
-      }
-
-      stderr += `line ${i + 1}: unknown statement: ${raw}\n`;
-      exitCode = 1;
-    });
-
+    const { stdout, stderr, exitCode } = interpret(data.source, universalStore);
     return { stdout, stderr, exitCode, ms: Date.now() - start };
   });
 
