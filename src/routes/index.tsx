@@ -132,14 +132,26 @@ function Header() {
 function Logo() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="10.5" stroke="currentColor" strokeOpacity="0.35" />
-      <path
-        d="M3 12c4-3 6-3 9 0s5 3 9 0"
+      <text
+        x="12"
+        y="17.5"
+        textAnchor="middle"
+        fontFamily="ui-serif, Georgia, 'Times New Roman', serif"
+        fontSize="17"
+        fontWeight="500"
+        fill="currentColor"
+      >
+        U
+      </text>
+      <line
+        x1="4.5"
+        y1="20"
+        x2="19.5"
+        y2="4"
         stroke="var(--primary)"
-        strokeWidth="1.5"
+        strokeWidth="1.75"
         strokeLinecap="round"
       />
-      <circle cx="12" cy="12" r="1.4" fill="var(--primary)" />
     </svg>
   );
 }
