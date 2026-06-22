@@ -139,15 +139,15 @@ function Logo() {
         fontFamily="ui-serif, Georgia, 'Times New Roman', serif"
         fontSize="17"
         fontWeight="500"
-        fill="currentColor"
+        fill="var(--primary)"
       >
         U
       </text>
       <line
-        x1="4.5"
-        y1="20"
-        x2="19.5"
-        y2="4"
+        x1="7"
+        y1="7"
+        x2="17"
+        y2="17"
         stroke="var(--primary)"
         strokeWidth="1.75"
         strokeLinecap="round"
