@@ -92,7 +92,6 @@ function Home() {
           result={result}
         />
 
-        <FeatureRow />
       </main>
       <Footer />
     </div>
