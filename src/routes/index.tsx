@@ -106,9 +106,9 @@ function Home() {
             Universal<span className="text-primary">.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Be part of a revolution in programming, with Universal. With next to no special characters,
-            cloud-synced data and 100% customization, Universal gives you unprecendented power over
-            your code, without sacrificing readability or ease of use. 
+            Be part of a revolution in programming, with Universal. With intuitive syntax,
+            cloud-synced data and 100% customizability, Universal gives you unprecendented power over
+            your code, while preserving ease of use. 
           </p>
         </section>
 
