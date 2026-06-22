@@ -71,15 +71,13 @@ function Home() {
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             v0.1 · early preview
           </div>
-          <h1 className="font-serif text-5xl leading-[1.05] tracking-tight text-foreground md:text-6xl">
-            A programming language
-            <br />
-            <span className="text-primary">designed to feel obvious.</span>
+          <h1 className="font-serif text-6xl leading-[1.05] tracking-tight text-foreground md:text-7xl">
+            Universal<span className="text-primary">.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Universal is small, readable, and runs anywhere. Write a program below and
-            press <span className="font-medium text-foreground">Run</span> to see it
-            execute — no setup, no accounts, no install.
+            Fully cloud-synced — your code is always with you, with no chance of losing
+            data. The syntax is clean, with no special characters to memorize, and the
+            language is extremely customizable, so it bends to fit the way you think.
           </p>
         </section>
 
@@ -171,10 +169,10 @@ function Playground({
     >
       <div className="flex items-center justify-between border-b border-border bg-secondary/40 px-4 py-2.5">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="h-2.5 w-2.5 rounded-full bg-primary/30" />
-          <span className="h-2.5 w-2.5 rounded-full bg-primary/15" />
-          <span className="h-2.5 w-2.5 rounded-full bg-primary/10" />
-          <span className="ml-3 font-mono">main.uni</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M3 12c4-3 6-3 9 0s5 3 9 0" stroke="var(--primary)" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <span className="ml-1 font-mono">main.uni</span>
         </div>
         <div className="flex items-center gap-2">
           <button
