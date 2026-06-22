@@ -145,9 +145,9 @@ function Logo() {
       </text>
       <line
         x1="7"
-        y1="7"
+        y1="9.1"
         x2="17"
-        y2="17"
+        y2="14.9"
         stroke="var(--primary)"
         strokeWidth="1.75"
         strokeLinecap="round"
