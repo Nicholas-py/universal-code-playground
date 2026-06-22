@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { runUniversal } from "@/lib/universal-run.functions";
+import { useCallback, useEffect, useState } from "react";
+import {
+  clearUniversal,
+  listUniversal,
+  runUniversal,
+} from "@/lib/universal-run.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,10 +26,15 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const DEFAULT_CODE = `# Your code goes here.
-# Press "Run" to execute.
+const DEFAULT_CODE = `# Variables marked "universal" are cloud-synced —
+# every visitor on the site sees the same value.
 
-print hello world
+save universal greeting = "hello from the cloud"
+save local_note = "this one only lives in this run"
+
+print greeting
+print local_note
+list universal
 `;
 
 type RunResult = {
@@ -35,17 +44,38 @@ type RunResult = {
   ms: number;
 };
 
+type CloudEntry = { name: string; value: string; updatedAt: number };
+
 function Home() {
   const run = useServerFn(runUniversal);
+  const list = useServerFn(listUniversal);
+  const clear = useServerFn(clearUniversal);
   const [code, setCode] = useState(DEFAULT_CODE);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
+  const [cloud, setCloud] = useState<CloudEntry[]>([]);
+
+  const refreshCloud = useCallback(async () => {
+    try {
+      const res = await list();
+      setCloud(res.entries);
+    } catch {
+      /* ignore */
+    }
+  }, [list]);
+
+  useEffect(() => {
+    refreshCloud();
+    const id = setInterval(refreshCloud, 4000);
+    return () => clearInterval(id);
+  }, [refreshCloud]);
 
   async function handleRun() {
     setRunning(true);
     try {
       const res = await run({ data: { source: code } });
       setResult(res);
+      refreshCloud();
     } catch (err) {
       setResult({
         stdout: "",
@@ -60,6 +90,11 @@ function Home() {
 
   function handleClear() {
     setResult(null);
+  }
+
+  async function handleClearCloud() {
+    await clear();
+    refreshCloud();
   }
 
   return (
