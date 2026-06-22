@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { runUniversal } from "@/lib/universal-run.functions";
+import { useCallback, useEffect, useState } from "react";
+import {
+  clearUniversal,
+  listUniversal,
+  runUniversal,
+} from "@/lib/universal-run.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,10 +26,15 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const DEFAULT_CODE = `# Your code goes here.
-# Press "Run" to execute.
+const DEFAULT_CODE = `# Variables marked "universal" are cloud-synced —
+# every visitor on the site sees the same value.
 
-print hello world
+save universal greeting = "hello from the cloud"
+save local_note = "this one only lives in this run"
+
+print greeting
+print local_note
+list universal
 `;
 
 type RunResult = {
@@ -35,17 +44,38 @@ type RunResult = {
   ms: number;
 };
 
+type CloudEntry = { name: string; value: string; updatedAt: number };
+
 function Home() {
   const run = useServerFn(runUniversal);
+  const list = useServerFn(listUniversal);
+  const clear = useServerFn(clearUniversal);
   const [code, setCode] = useState(DEFAULT_CODE);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
+  const [cloud, setCloud] = useState<CloudEntry[]>([]);
+
+  const refreshCloud = useCallback(async () => {
+    try {
+      const res = await list();
+      setCloud(res.entries);
+    } catch {
+      /* ignore */
+    }
+  }, [list]);
+
+  useEffect(() => {
+    refreshCloud();
+    const id = setInterval(refreshCloud, 4000);
+    return () => clearInterval(id);
+  }, [refreshCloud]);
 
   async function handleRun() {
     setRunning(true);
     try {
       const res = await run({ data: { source: code } });
       setResult(res);
+      refreshCloud();
     } catch (err) {
       setResult({
         stdout: "",
@@ -60,6 +90,11 @@ function Home() {
 
   function handleClear() {
     setResult(null);
+  }
+
+  async function handleClearCloud() {
+    await clear();
+    refreshCloud();
   }
 
   return (
@@ -86,9 +121,70 @@ function Home() {
           result={result}
         />
 
+        <CloudPanel entries={cloud} onClear={handleClearCloud} onRefresh={refreshCloud} />
+
       </main>
       <Footer />
     </div>
+  );
+}
+
+function CloudPanel({
+  entries,
+  onClear,
+  onRefresh,
+}: {
+  entries: CloudEntry[];
+  onClear: () => void;
+  onRefresh: () => void;
+}) {
+  return (
+    <section
+      className="mt-8 overflow-hidden rounded-2xl border border-border bg-card"
+      style={{ boxShadow: "var(--shadow-elegant)" }}
+    >
+      <div className="flex items-center justify-between border-b border-border bg-secondary/40 px-4 py-2.5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+          <span className="font-mono">cloud · universal store</span>
+          <span className="ml-2">shared across every visitor</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onRefresh}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            Refresh
+          </button>
+          <button
+            onClick={onClear}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            Clear cloud
+          </button>
+        </div>
+      </div>
+      <div className="px-4 py-4">
+        {entries.length === 0 ? (
+          <p className="font-mono text-sm text-muted-foreground">
+            (empty) — run <span className="text-foreground">save universal name = "value"</span> to add one.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {entries.map((e) => (
+              <li key={e.name} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
+                <span className="text-foreground">
+                  <span className="text-primary">{e.name}</span> = "{e.value}"
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(e.updatedAt).toLocaleTimeString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
 
