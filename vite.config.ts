@@ -17,7 +17,7 @@ export default defineConfig({
   vite: {
     base: "/universal/"
   },
-  nitro: {},
+  nitro: {     baseURL: "/universal"},
   
 
   
