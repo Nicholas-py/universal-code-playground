@@ -12,11 +12,15 @@ export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
-    server: { entry: "server",preset:"node" },
+    server: { entry: "server" },
   },
   vite: {
     base: "/universal/"
   },
+  nitro: {     baseURL: "/universal"},
+  
+
+  
   plugins: [cloudflare({
     viteEnvironment: {
       name: "ssr"
