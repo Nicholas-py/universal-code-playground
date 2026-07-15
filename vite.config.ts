@@ -14,6 +14,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  base: "/universal/",
   plugins: [cloudflare({
     viteEnvironment: {
       name: "ssr"
