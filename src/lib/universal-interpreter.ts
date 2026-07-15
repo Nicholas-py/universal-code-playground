@@ -1,5 +1,5 @@
 /**
- * Universal interpreter — Written in ts, sadly
+ * Universal interpreter —  Written in ts, sadly
  *
  * This port
  * exists only because the Cloudflare Worker runtime can't execute Python at
