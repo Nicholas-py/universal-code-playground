@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 import {
-  clearUniversal,
-  listUniversal,
   runUniversal,
+  getUniversal,
+  getUniversalRaw
 } from "@/lib/universal-run.functions";
 
 export const Route = createFileRoute("/")({
@@ -44,12 +44,11 @@ type RunResult = {
   ms: number;
 };
 
-type CloudEntry = { name: string; value: string; updatedAt: number };
+type CloudEntry = { name: string; value: string; };
 
 function Home() {
   const run = useServerFn(runUniversal);
-  const list = useServerFn(listUniversal);
-  const clear = useServerFn(clearUniversal);
+  const list = useServerFn(getUniversal);
   const [code, setCode] = useState(DEFAULT_CODE);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
@@ -57,85 +56,80 @@ function Home() {
 
   const refreshCloud = useCallback(async () => {
     try {
+      run({ data: { source: "" } });
       const res = await list();
-      setCloud(res.entries);
-    } catch {
+      console.log(res)
+      setCloud([{ name: "pie", value: "exists" }, { name: "pi", value: "doesn't exist" }]);
+    } catch (e) {
       /* ignore */
-    }
+      setCloud([{ name: "pie", value: "exists" }, { name: "pi", value: "doesn't exist" }]);
+}
   }, [list]);
 
-  useEffect(() => {
+useEffect(() => {
+  refreshCloud();
+  const id = setInterval(refreshCloud, 4000);
+  return () => clearInterval(id);
+}, [refreshCloud]);
+
+async function handleRun() {
+  setRunning(true);
+  try {
+    const res = await run({ data: { source: code } });
+    setResult(res);
     refreshCloud();
-    const id = setInterval(refreshCloud, 4000);
-    return () => clearInterval(id);
-  }, [refreshCloud]);
-
-  async function handleRun() {
-    setRunning(true);
-    try {
-      const res = await run({ data: { source: code } });
-      setResult(res);
-      refreshCloud();
-    } catch (err) {
-      setResult({
-        stdout: "",
-        stderr: err instanceof Error ? err.message : String(err),
-        exitCode: 1,
-        ms: 0,
-      });
-    } finally {
-      setRunning(false);
-    }
+  } catch (err) {
+    setResult({
+      stdout: "",
+      stderr: err instanceof Error ? err.message : String(err),
+      exitCode: 1,
+      ms: 0,
+    });
+  } finally {
+    setRunning(false);
   }
+}
 
-  function handleClear() {
-    setResult(null);
-  }
+function handleClear() {
+  setResult(null);
+}
 
-  async function handleClearCloud() {
-    await clear();
-    refreshCloud();
-  }
+return (
+  <div className="min-h-screen" style={{ background: "var(--gradient-soft)" }}>
+    <Header />
+    <main className="mx-auto w-full max-w-6xl px-6 pb-24 pt-12 md:pt-20">
+      <section className="mb-12 max-w-3xl">
+        <h1 className="font-serif text-6xl leading-[1.05] tracking-tight text-foreground md:text-7xl">
+          Universal<span className="text-primary">.</span>
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+          Be part of a revolution in programming, with Universal. With intuitive syntax,
+          cloud-synced data and 100% customizability, Universal gives you unprecendented power over
+          your code, while preserving ease of use.
+        </p>
+      </section>
 
-  return (
-    <div className="min-h-screen" style={{ background: "var(--gradient-soft)" }}>
-      <Header />
-      <main className="mx-auto w-full max-w-6xl px-6 pb-24 pt-12 md:pt-20">
-        <section className="mb-12 max-w-3xl">
-          <h1 className="font-serif text-6xl leading-[1.05] tracking-tight text-foreground md:text-7xl">
-            Universal<span className="text-primary">.</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Be part of a revolution in programming, with Universal. With intuitive syntax,
-            cloud-synced data and 100% customizability, Universal gives you unprecendented power over
-            your code, while preserving ease of use. 
-          </p>
-        </section>
+      <Playground
+        code={code}
+        onChange={setCode}
+        onRun={handleRun}
+        running={running}
+        result={result}
+      />
 
-        <Playground
-          code={code}
-          onChange={setCode}
-          onRun={handleRun}
-          onClear={handleClear}
-          running={running}
-          result={result}
-        />
+      <CloudPanel entries={cloud} onRefresh={refreshCloud} />
 
-        <CloudPanel entries={cloud} onClear={handleClearCloud} onRefresh={refreshCloud} />
-
-      </main>
-      <Footer />
-    </div>
-  );
+    </main>
+    <Footer />
+  </div>
+);
 }
 
 function CloudPanel({
   entries,
-  onClear,
   onRefresh,
 }: {
   entries: CloudEntry[];
-  onClear: () => void;
   onRefresh: () => void;
 }) {
   return (
@@ -156,28 +150,19 @@ function CloudPanel({
           >
             Refresh
           </button>
-          <button
-            onClick={onClear}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          >
-            Clear cloud
-          </button>
         </div>
       </div>
       <div className="px-4 py-4">
-        {entries.length === 0 ? (
+        {entries.length == 0 ? (
           <p className="font-mono text-sm text-muted-foreground">
-            (empty) — run <span className="text-foreground">save universal name = "value"</span> to add one.
-          </p>
+            (empty) - aaa.
+                      </p>
         ) : (
           <ul className="divide-y divide-border">
             {entries.map((e) => (
               <li key={e.name} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
                 <span className="text-foreground">
                   <span className="text-primary">{e.name}</span> = "{e.value}"
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(e.updatedAt).toLocaleTimeString()}
                 </span>
               </li>
             ))}
@@ -200,7 +185,7 @@ function Header() {
           <a className="transition-colors hover:text-foreground" href="#playground">
             Playground
           </a>
-            <a
+          <a
             className="transition-colors hover:text-foreground"
             href="https://github.com/Nicholas-py/universal-code-playground"
             target="_blank"
@@ -260,14 +245,12 @@ function Playground({
   code,
   onChange,
   onRun,
-  onClear,
   running,
   result,
 }: {
   code: string;
   onChange: (v: string) => void;
   onRun: () => void;
-  onClear: () => void;
   running: boolean;
   result: RunResult | null;
 }) {
@@ -285,12 +268,6 @@ function Playground({
           <span className="ml-1 font-mono">main.uni</span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={onClear}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          >
-            Clear output
-          </button>
           <button
             onClick={onRun}
             disabled={running}

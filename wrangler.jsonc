@@ -8,5 +8,16 @@
   "main": "@tanstack/react-start/server-entry",
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "durable_objects": {
+    "bindings": [
+            {
+        "name": "UNIVERSAL_STORE",
+        "class_name": "UniversalStore",
+        "script_name": "universal-store"  
+      }
+    ]
+  }
+  
 }
+
