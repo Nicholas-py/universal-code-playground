@@ -44,7 +44,6 @@ type RunResult = {
   ms: number;
 };
 
-type CloudEntry = { name: string; value: string; };
 
 function Home() {
   const run = useServerFn(runUniversal);
@@ -52,17 +51,15 @@ function Home() {
   const [code, setCode] = useState(DEFAULT_CODE);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
-  const [cloud, setCloud] = useState<CloudEntry[]>([]);
+  const [localVariables, setLocalVariables] = useState<Record<string, string>>({});
 
   const refreshCloud = useCallback(async () => {
     try {
       run({ data: { source: "" } });
       const res = await list();
-      console.log(res)
-      setCloud([{ name: "pie", value: "exists" }, { name: "pi", value: "doesn't exist" }]);
+      setLocalVariables(res);
     } catch (e) {
-      /* ignore */
-      setCloud([{ name: "pie", value: "exists" }, { name: "pi", value: "doesn't exist" }]);
+      setLocalVariables({ "pie": "exists" ,  "pi": "doesn't exist" });
 }
   }, [list]);
 
@@ -117,7 +114,7 @@ return (
         result={result}
       />
 
-      <CloudPanel entries={cloud} onRefresh={refreshCloud} />
+      <CloudPanel entries={localVariables} onRefresh={refreshCloud} />
 
     </main>
     <Footer />
@@ -129,9 +126,12 @@ function CloudPanel({
   entries,
   onRefresh,
 }: {
-  entries: CloudEntry[];
+  entries: Record<string, string>;
   onRefresh: () => void;
 }) {
+  const keys = Object.keys(entries);
+  const values = Object.values(entries);
+
   return (
     <section
       className="mt-8 overflow-hidden rounded-2xl border border-border bg-card"
@@ -153,16 +153,16 @@ function CloudPanel({
         </div>
       </div>
       <div className="px-4 py-4">
-        {entries.length == 0 ? (
+        {keys.length == 0 ? (
           <p className="font-mono text-sm text-muted-foreground">
             (empty) - aaa.
                       </p>
         ) : (
           <ul className="divide-y divide-border">
-            {entries.map((e) => (
-              <li key={e.name} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
+            {keys.map((e) => (
+              <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
                 <span className="text-foreground">
-                  <span className="text-primary">{e.name}</span> = "{e.value}"
+                  <span className="text-primary">{e}</span> = "{entries[e]}"
                 </span>
               </li>
             ))}
