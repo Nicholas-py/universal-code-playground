@@ -1,8 +1,8 @@
-import { createServerFn } from "@tanstack/react-start";
-import { interpret, type UniversalEntry } from "./universal-interpreter";
+import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { env } from 'cloudflare:workers';
 import { UniversalStoreRPC } from "../../durableobj";
-
+import { interpret } from "./universal-interpreter";
+import { UniversalStore } from "./universal-store";
 /**
  * Thin worker wrapper around the Universal interpreter.
  *
@@ -14,9 +14,6 @@ import { UniversalStoreRPC } from "../../durableobj";
  */
 
 
-
-const universalStore = new Map<string, UniversalEntry>();
-
 //Run universal code
 export const runUniversal = createServerFn({ method: "POST" })
   .inputValidator((input: { source: string }) => {
@@ -25,9 +22,8 @@ export const runUniversal = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }) => {
-    await setUniversal({data:{"hello":"world"}})
     const start = Date.now();
-    const { stdout, stderr, exitCode } = interpret(data.source, universalStore);
+    const { stdout, stderr, exitCode } = await interpret(data.source, universalStore);
     return { stdout, stderr, exitCode, ms: Date.now() - start };
   });
 
@@ -47,20 +43,26 @@ export const runUniversal = createServerFn({ method: "POST" })
 //   return { ok: true };
 // });
 
-export const getUniversalRaw = createServerFn({method: "GET"})
-  .handler( async () => {
-    return (env.UNIVERSAL_STORE.getByName('store') as unknown as UniversalStoreRPC).getFullStore();
+export const getUniversalRaw = createServerFn({ method: "GET" })
+  .handler(async () => {
+    return `{full:${(env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).getFull()},    master:${(env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).getFull()}} `;
   })
 
 
-export const getUniversal = createServerFn({method: "GET"})
-  .handler( async () => {
-    const result =  await (env.UNIVERSAL_STORE.getByName('store') as unknown as UniversalStoreRPC).getFullStore();
-    return JSON.parse(result);
+export const getUniversal = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const full = await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).getFull();
+    const master = await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).getMaster();
+    return { full: JSON.parse(full), master: JSON.parse(master) };
   })
 
-export const setUniversal = createServerFn({method: "POST"})
-.validator((json:Record<string, string>) => json)
-  .handler( async ({data:json}) => {
-    return (env.UNIVERSAL_STORE.getByName('store') as unknown as UniversalStoreRPC).setValues(json);
+export const setUniversal = createServerFn({ method: "POST" })
+  .validator((json: { full: Record<string, string>, master: Record<string, string> }) => json)
+  .handler(async ({ data: json }) => {
+    await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).setFull(json.full);
+    await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).setMaster(json.master);
+    return true;
   })
+
+
+export const universalStore = new UniversalStore(setUniversal, getUniversal);

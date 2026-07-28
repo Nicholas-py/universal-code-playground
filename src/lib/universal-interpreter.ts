@@ -1,13 +1,14 @@
+import { UniversalStore } from "./universal-store";
+
+
 /**
- * Universal interpreter —  Written in ts, sadly
+ * This is the actual interpreter
  *
- * This port
- * exists only because the Cloudflare Worker runtime can't execute Python at
+ * it's in TS because the Cloudflare Worker runtime can't execute Python at
  * request time.
  */
 
-export type UniversalEntry = { value: string; updatedAt: number };
-export type Store = Map<string, UniversalEntry>;
+
 export type InterpretResult = { stdout: string; stderr: string; exitCode: number };
 
 function parseStringLiteral(raw: string): string | null {
@@ -18,11 +19,12 @@ function parseStringLiteral(raw: string): string | null {
   return null;
 }
 
-export function interpret(source: string, universalStore: Store): InterpretResult {
+export async function interpret(source: string, store: UniversalStore): Promise<InterpretResult> {
   let stdout = "";
   let stderr = "";
   let exitCode = 0;
   const locals = new Map<string, string>();
+  await store.sync();
 
   const lines = source.split("\n");
   for (let i = 0; i < lines.length; i++) {
@@ -33,10 +35,14 @@ export function interpret(source: string, universalStore: Store): InterpretResul
 
     // list universal
     if (line === "list universal") {
-      if (universalStore.size === 0) {
+      const keys = store.listKeys();
+      if (keys.length === 0) {
         stdout += "(cloud store is empty)\n";
-      } else {
-        for (const [k, v] of universalStore) stdout += `${k} = "${v.value}"\n`;
+      }
+      else {
+        for (const k of keys) {
+          stdout += `${k}\n`;
+        }
       }
       continue;
     }
@@ -49,18 +55,18 @@ export function interpret(source: string, universalStore: Store): InterpretResul
       const eq = rest.indexOf("=");
       if (eq === -1) {
         stderr += `line ${lineNo}: save needs '=': ${raw}\n`;
-        exitCode = 1;
+        exitCode = 2;
         continue;
       }
       const name = rest.slice(0, eq).trim();
       const value = parseStringLiteral(rest.slice(eq + 1));
       if (!name || value === null) {
         stderr += `line ${lineNo}: invalid save: ${raw}\n`;
-        exitCode = 1;
+        exitCode = 3;
         continue;
       }
       if (isUniversal) {
-        universalStore.set(name, { value, updatedAt: Date.now() });
+        store.setValue(name, value);
       } else {
         locals.set(name, value);
       }
@@ -77,12 +83,8 @@ export function interpret(source: string, universalStore: Store): InterpretResul
       } else if (rest) {
         if (locals.has(rest)) {
           stdout += locals.get(rest)! + "\n";
-        } else if (universalStore.has(rest)) {
-          stdout += universalStore.get(rest)!.value + "\n";
-        } else {
-          stderr += `line ${lineNo}: undefined name: ${rest}\n`;
-          exitCode = 1;
-        }
+        } else  {
+        stdout += store.getValue(rest) + "\n";}
       } else {
         stdout += "\n";
       }
@@ -90,7 +92,7 @@ export function interpret(source: string, universalStore: Store): InterpretResul
     }
 
     stderr += `line ${lineNo}: unknown statement: ${raw}\n`;
-    exitCode = 1;
+    exitCode = 4;
     return { stdout, stderr, exitCode };
 
   }

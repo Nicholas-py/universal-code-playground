@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import {
   runUniversal,
   getUniversal,
-  getUniversalRaw
+  getUniversalRaw,
+  setUniversal,
+  universalStore
 } from "@/lib/universal-run.functions";
 
 export const Route = createFileRoute("/")({
@@ -47,90 +49,99 @@ type RunResult = {
 
 function Home() {
   const run = useServerFn(runUniversal);
-  const list = useServerFn(getUniversal);
+  const getuni = useServerFn(getUniversal);
+  const setuni = useServerFn(setUniversal);
   const [code, setCode] = useState(DEFAULT_CODE);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [localVariables, setLocalVariables] = useState<Record<string, string>>({});
+  const [displayVariables, setDisplayVariables] = useState<string[]>([]);
+
+
 
   const refreshCloud = useCallback(async () => {
     try {
-      run({ data: { source: "" } });
-      const res = await list();
+      const res = await getuni();
       setLocalVariables(res);
     } catch (e) {
-      setLocalVariables({ "pie": "exists" ,  "pi": "doesn't exist" });
-}
-  }, [list]);
 
-useEffect(() => {
-  refreshCloud();
-  const id = setInterval(refreshCloud, 4000);
-  return () => clearInterval(id);
-}, [refreshCloud]);
+    }
+    //Temporary - set display variables to shuffled version of real ones
+    setDisplayVariables(Object.keys(localVariables).map(value => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value))
 
-async function handleRun() {
-  setRunning(true);
-  try {
-    const res = await run({ data: { source: code } });
-    setResult(res);
+  }, [getuni]);
+
+  useEffect(() => {
     refreshCloud();
-  } catch (err) {
-    setResult({
-      stdout: "",
-      stderr: err instanceof Error ? err.message : String(err),
-      exitCode: 1,
-      ms: 0,
-    });
-  } finally {
-    setRunning(false);
+    const id = setInterval(refreshCloud, 4000);
+    return () => clearInterval(id);
+  }, [refreshCloud]);
+
+  async function handleRun() {
+    setRunning(true);
+    try {
+      const res = await run({ data: { source: code } });
+      setResult(res);
+      refreshCloud();
+    } catch (err) {
+      throw err;
+      setResult({
+        stdout: "",
+        stderr: err instanceof Error ? err.message : String(err),
+        exitCode: 1,
+        ms: 0,
+      });
+    } finally {
+      setRunning(false);
+    }
   }
-}
 
-function handleClear() {
-  setResult(null);
-}
+  function handleClear() {
+    setResult(null);
+  }
 
-return (
-  <div className="min-h-screen" style={{ background: "var(--gradient-soft)" }}>
-    <Header />
-    <main className="mx-auto w-full max-w-6xl px-6 pb-24 pt-12 md:pt-20">
-      <section className="mb-12 max-w-3xl">
-        <h1 className="font-serif text-6xl leading-[1.05] tracking-tight text-foreground md:text-7xl">
-          Universal<span className="text-primary">.</span>
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          Be part of a revolution in programming, with Universal. With intuitive syntax,
-          cloud-synced data and 100% customizability, Universal gives you unprecendented power over
-          your code, while preserving ease of use.
-        </p>
-      </section>
+  return (
+    <div className="min-h-screen" style={{ background: "var(--gradient-soft)" }}>
+      <Header />
+      <main className="mx-auto w-full max-w-6xl px-6 pb-24 pt-12 md:pt-20">
+        <section className="mb-12 max-w-3xl">
+          <h1 className="font-serif text-6xl leading-[1.05] tracking-tight text-foreground md:text-7xl">
+            Universal<span className="text-primary">.</span>
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            Be part of a revolution in programming, with Universal. With intuitive syntax,
+            cloud-synced data and 100% customizability, Universal gives you unprecendented power over
+            your code, while preserving ease of use.
+          </p>
+        </section>
 
-      <Playground
-        code={code}
-        onChange={setCode}
-        onRun={handleRun}
-        running={running}
-        result={result}
-      />
+        <Playground
+          code={code}
+          onChange={setCode}
+          onRun={handleRun}
+          running={running}
+          result={result}
+        />
 
-      <CloudPanel entries={localVariables} onRefresh={refreshCloud} />
+        <CloudPanel entries={displayVariables} onRefresh={refreshCloud} localVariables={localVariables}/>
 
-    </main>
-    <Footer />
-  </div>
-);
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
 function CloudPanel({
   entries,
   onRefresh,
+  localVariables
 }: {
-  entries: Record<string, string>;
+  entries: string[];
   onRefresh: () => void;
+  localVariables: Record<string,string>
 }) {
-  const keys = Object.keys(entries);
-  const values = Object.values(entries);
 
   return (
     <section
@@ -153,19 +164,33 @@ function CloudPanel({
         </div>
       </div>
       <div className="px-4 py-4">
-        {keys.length == 0 ? (
+        {entries.length == 0 ? (
           <p className="font-mono text-sm text-muted-foreground">
             (empty) - aaa.
-                      </p>
-        ) : (
+          </p>
+        ) : (entries.length <= 3 ? (
           <ul className="divide-y divide-border">
-            {keys.map((e) => (
+            {entries.map((e) => (
               <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
                 <span className="text-foreground">
-                  <span className="text-primary">{e}</span> = "{entries[e]}"
+                  <span className="text-primary">{e}</span> = "{localVariables[e]}"
                 </span>
               </li>
             ))}
+          </ul>
+        ) :
+
+          <ul className="divide-y divide-border">
+            {entries
+              //take first 3 keys
+              .slice(0, 3)
+              .map((e) => (
+                <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
+                  <span className="text-foreground">
+                    <span className="text-primary">{e}</span> = "{localVariables[e]}"
+                  </span>
+                </li>
+              ))}
           </ul>
         )}
       </div>
