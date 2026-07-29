@@ -86,7 +86,6 @@ function Home() {
       setResult(res);
       refreshCloud();
     } catch (err) {
-      throw err;
       setResult({
         stdout: "",
         stderr: err instanceof Error ? err.message : String(err),
@@ -125,7 +124,7 @@ function Home() {
           result={result}
         />
 
-        <CloudPanel entries={displayVariables} onRefresh={refreshCloud} localVariables={localVariables}/>
+        <CloudPanel entries={displayVariables} onRefresh={refreshCloud} localVariables={localVariables} />
 
       </main>
       <Footer />
@@ -140,7 +139,7 @@ function CloudPanel({
 }: {
   entries: string[];
   onRefresh: () => void;
-  localVariables: Record<string,string>
+  localVariables: Record<string, string>
 }) {
 
   return (
@@ -166,32 +165,21 @@ function CloudPanel({
       <div className="px-4 py-4">
         {entries.length == 0 ? (
           <p className="font-mono text-sm text-muted-foreground">
-            (empty) - aaa.
+            Error - store is empty.
           </p>
-        ) : (entries.length <= 3 ? (
-          <ul className="divide-y divide-border">
-            {entries.map((e) => (
-              <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
-                <span className="text-foreground">
-                  <span className="text-primary">{e}</span> = "{localVariables[e]}"
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) :
-
-          <ul className="divide-y divide-border">
-            {entries
-              //take first 3 keys
-              .slice(0, 3)
-              .map((e) => (
-                <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
-                  <span className="text-foreground">
-                    <span className="text-primary">{e}</span> = "{localVariables[e]}"
-                  </span>
-                </li>
-              ))}
-          </ul>
+        ) : (
+            (<ul className="divide-y divide-border">
+              {entries
+                //take first 3 keys
+                .slice(0, 3)
+                .map((e) => (
+                  <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
+                    <span className="text-foreground">
+                      <span className="text-primary">{e}</span> = "{localVariables[e]}"
+                    </span>
+                  </li>
+                ))}
+            </ul>)
         )}
       </div>
     </section>

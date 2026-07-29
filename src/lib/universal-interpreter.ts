@@ -24,7 +24,6 @@ export async function interpret(source: string, store: UniversalStore): Promise<
   let stderr = "";
   let exitCode = 0;
   const locals = new Map<string, string>();
-  await store.sync();
 
   const lines = source.split("\n");
   for (let i = 0; i < lines.length; i++) {

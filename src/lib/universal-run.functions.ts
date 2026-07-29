@@ -23,7 +23,10 @@ export const runUniversal = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const start = Date.now();
+    const universalStore = new UniversalStore();
+    await universalStore.sync();
     const { stdout, stderr, exitCode } = await interpret(data.source, universalStore);
+    await universalStore.sync();
     return { stdout, stderr, exitCode, ms: Date.now() - start };
   });
 
@@ -65,4 +68,3 @@ export const setUniversal = createServerFn({ method: "POST" })
   })
 
 
-export const universalStore = new UniversalStore(setUniversal, getUniversal);
