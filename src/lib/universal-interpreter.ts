@@ -1,5 +1,6 @@
 import { UniversalStore } from "./universal-store";
 
+class UniversalError extends Error { }
 
 /**
  * This is the actual interpreter
@@ -8,8 +9,229 @@ import { UniversalStore } from "./universal-store";
  * request time.
  */
 
+//Temporary list of builtin functions + the like
+const storedefaults = {
+  "hello": "str:Hello",
+  "world": "str:World!",
+  "print": "fun:=print"
+}
 
-export type InterpretResult = { stdout: string; stderr: string; exitCode: number };
+type UniArg = UniversalObj | undefined
+
+abstract class UniversalObj {
+  public readonly type: string = "bae"
+  protected value: any
+
+  constructor(inp: string, protected interpreter?:Interpreter) {
+    this.value = this.parse(inp);
+  }
+
+  public abstract tostring(): string;
+  public abstract exec(arg: UniArg): UniversalObj;
+
+  public abstract hash(): string;
+  public abstract parse(arg: string): any;
+
+}
+
+class UNumber extends UniversalObj {
+  public readonly type: string = "num"
+  declare protected value: number;
+
+  public tostring(): string {
+    return this.value.toString();
+  }
+  public hash(): string {
+    return this.value.toString();
+  }
+  public exec(arg: UniArg): UniversalObj {
+    if (arg !== undefined) {
+      throw new UniversalError("Cannot execute number with value");
+    }
+    return this;
+  }
+  parse(arg: string): number {
+    return parseFloat(arg);
+  }
+}
+
+class UString extends UniversalObj {
+  public readonly type: string = "str"
+  declare protected value: string;
+
+  public tostring(): string {
+    return this.value;
+  }
+
+  public exec(arg: UniArg): UniversalObj {
+    if (arg !== undefined) {
+      throw new UniversalError("Cannot execute string with value");
+    }
+    return this;
+  }
+
+  public hash(): string {
+    return this.value.toString();
+  }
+
+  public parse(arg: string): string {
+    return arg;
+  }
+}
+
+class UFunctionBuiltin extends UniversalObj {
+  public readonly type: string = "fub"
+  declare protected value: Function;
+
+  public tostring(): string {
+    return this.value.name;
+  }
+
+  public exec(arg: UniArg): UniversalObj {
+    return this.value(arg, this.interpreter);
+  }
+
+  public hash(): string {
+    return this.value.name;
+  }
+
+  public parse(arg: string): Function {
+    return this.interpreter!.builtins[arg];
+  }
+}
+
+
+
+class Interpreter {
+  stdout: string[] = []
+
+  builtins: Record<string, Function> = { "print": this.print }
+  types = { "num": UNumber, "str":UString,"fub":UFunctionBuiltin } as const
+
+
+  constructor(private source: string, private store: UniversalStore) {
+  }
+
+  async run() {
+
+    this.store.reset();
+    Object.keys(storedefaults).forEach((key) => {
+      this.store.setValue(key, storedefaults[key as keyof typeof storedefaults])
+    })
+
+
+    this.interpret(this.source);
+
+  }
+
+  interpret(code: string): UniversalObj {
+    let lines = code.trim().split('\n');
+
+    console.log("exec",code)
+
+    //Multiple lines? Run each in sequence, and do nothing with result
+    if (lines.length > 1) {
+      let lastval: UniversalObj = new UString("", this);
+      lines.forEach((line) => {
+        if (line.trim().length > 0)
+          lastval = this.interpret(line.trim());
+      });
+
+      return lastval;
+    }
+
+    if (code.trim().length == 0) {
+      return new UString("",this)
+    }
+
+
+    //Set value
+    if (code.includes('=')) {
+      const lst = code.trim().split('=')
+      if (lst.length > 2) {
+        throw new UniversalError("Only 1 equals sign per line");
+      }
+      if (lst.length < 2) {
+        throw new UniversalError("Equal sign must be preceded and followed by a value")
+      }
+
+      lst[0] = lst[0].trim();
+      lst[1] = lst[1].trim();
+
+      let key;
+      if (lst[0].includes(' ')) {
+        key = this.interpret(lst[0]).tostring();
+      }
+      else {
+        key = lst[0];
+      }
+
+      let val: UniversalObj = this.interpret(lst[1])
+      let valhash = val.type + ':' + val.hash();
+
+      this.store.setValue(key, valhash);
+
+      return val;
+    }
+
+
+    else {
+      console.log(this.store.listKeys())
+      let tokens = code.split(' ');
+      let curobj: UniversalObj = this.createobj(tokens[tokens.length - 1])
+      for (let i = tokens.length - 2; i >= 0; i--) {
+        if (tokens[i].trim().length == 0) {
+          continue;
+        }
+        let newobj = this.createobj(tokens[i])
+        try {
+          curobj = newobj.exec(curobj)
+        } catch {
+
+          try {
+            curobj = curobj!.exec(newobj)
+          } catch {
+            console.log("Fallback")
+            //TODO - replace with list [newobj, curobj]
+            curobj = new UString(`List(${newobj}, ${curobj})`, this)
+          }
+        }
+      }
+
+      return curobj;
+    }
+
+
+  }
+
+  createobj(token: string): UniversalObj {
+    let storestr = this.store.getValue(token);
+    //split at first instance of :
+    let lst = storestr.split(/:(.*)/s)
+    let type = lst[0]; let value = lst[1];
+
+
+    if (value.length > 0 && value[0] == '=') {
+      return new UFunctionBuiltin(value.slice(1), this)
+    }
+
+    let cls = this.types[type as keyof typeof this.types];
+    return new cls(value, this)
+  }
+
+
+  print(arg: UniArg, interpreter:Interpreter): UniversalObj {
+    if (arg == undefined) {
+      return new UString("", this);
+    }
+    interpreter.stdout.push(arg.tostring());
+    return new UString(arg.tostring(), this);
+  }
+}
+
+
+
+export type InterpretResult = { stdout: string; stderr: string };
 
 function parseStringLiteral(raw: string): string | null {
   const s = raw.trim();
@@ -19,11 +241,38 @@ function parseStringLiteral(raw: string): string | null {
   return null;
 }
 
-export async function interpret(source: string, store: UniversalStore): Promise<InterpretResult> {
+
+
+
+export async function interpretsource(source: string, store: UniversalStore): Promise<InterpretResult> {
+
+  const interpreter = new Interpreter(source, store);
+  let err = ""
+  let out = ""
+  try {
+    await interpreter.run();
+  }
+  catch (e) {
+    if (e instanceof UniversalError) {
+      err = e.message
+    }
+    else {
+      throw e;
+    }
+  }
+
+  out += interpreter.stdout.join('\n')+'\n'
+
+
+  return {stdout:out, stderr:err}
+  
+
+
+  const locals = new Map<string, string>();
   let stdout = "";
   let stderr = "";
-  let exitCode = 0;
-  const locals = new Map<string, string>();
+
+
 
   const lines = source.split("\n");
   for (let i = 0; i < lines.length; i++) {
@@ -54,20 +303,18 @@ export async function interpret(source: string, store: UniversalStore): Promise<
       const eq = rest.indexOf("=");
       if (eq === -1) {
         stderr += `line ${lineNo}: save needs '=': ${raw}\n`;
-        exitCode = 2;
         continue;
       }
       const name = rest.slice(0, eq).trim();
       const value = parseStringLiteral(rest.slice(eq + 1));
       if (!name || value === null) {
         stderr += `line ${lineNo}: invalid save: ${raw}\n`;
-        exitCode = 3;
         continue;
       }
       if (isUniversal) {
-        store.setValue(name, value);
+       // store.setValue(name, value);
       } else {
-        locals.set(name, value);
+   //     locals.set(name, value);
       }
       continue;
     }
@@ -82,8 +329,9 @@ export async function interpret(source: string, store: UniversalStore): Promise<
       } else if (rest) {
         if (locals.has(rest)) {
           stdout += locals.get(rest)! + "\n";
-        } else  {
-        stdout += store.getValue(rest) + "\n";}
+        } else {
+          stdout += store.getValue(rest) + "\n";
+        }
       } else {
         stdout += "\n";
       }
@@ -91,10 +339,9 @@ export async function interpret(source: string, store: UniversalStore): Promise<
     }
 
     stderr += `line ${lineNo}: unknown statement: ${raw}\n`;
-    exitCode = 4;
-    return { stdout, stderr, exitCode };
+    return { stdout, stderr };
 
   }
 
-  return { stdout, stderr, exitCode };
+  return { stdout, stderr };
 }

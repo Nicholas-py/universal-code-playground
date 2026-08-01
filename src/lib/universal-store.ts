@@ -15,6 +15,7 @@ export class UniversalStore {
     private mchanges: Record<string, string> = {}
 
     public async sync() {
+        this.reset();
         let json = { full: { ...this.fchanges }, master: { ...this.mchanges } };
         await this.setglobal(json);
 
@@ -28,17 +29,16 @@ export class UniversalStore {
     }
 
     public getValue(varname: string): string {
-        console.log(this.fullstore, this.masterstore)
         if (varname in this.fullstore) {
             return this.fullstore[varname]
         }
 
-        const raw = this.getRawName(varname);
+        let raw = this.getRawName(varname);
         if (raw in this.masterstore) {
             return this.masterstore[raw];
         }
 
-        return varname;
+        return 'str:'+varname;
     }
 
     public setValue(varname: string, value: string) {
@@ -65,6 +65,12 @@ export class UniversalStore {
         if (varname.includes("=")) {
             throw new EvalError("= cannot be in variable names")
         }
+        try {
+            //Return numbers straight up
+            parseFloat(varname);
+            return varname
+        }
+        catch {}
         return varname.replace(/\d+$/, "");
     }
 
@@ -77,6 +83,11 @@ export class UniversalStore {
         const full = await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).getFull();
         const master = await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).getMaster();
         return { full: JSON.parse(full), master: JSON.parse(master) };
+    }
+
+    async reset() {
+        await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).reset()
+
     }
 
 }

@@ -4,9 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   runUniversal,
   getUniversal,
-  getUniversalRaw,
   setUniversal,
-  universalStore
 } from "@/lib/universal-run.functions";
 
 export const Route = createFileRoute("/")({
@@ -28,22 +26,13 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const DEFAULT_CODE = `# Variables marked "universal" are cloud-synced —
-# every visitor on the site sees the same value.
-
-save universal greeting = "hello from the cloud"
-save local_note = "this one only lives in this run"
-
-print greeting
-print local_note
-list universal
+const DEFAULT_CODE = `print hello
+print world
 `;
 
 type RunResult = {
   stdout: string;
   stderr: string;
-  exitCode: number;
-  ms: number;
 };
 
 
@@ -89,8 +78,6 @@ function Home() {
       setResult({
         stdout: "",
         stderr: err instanceof Error ? err.message : String(err),
-        exitCode: 1,
-        ms: 0,
       });
     } finally {
       setRunning(false);
@@ -324,7 +311,6 @@ function Playground({
             <span className="font-mono uppercase tracking-wider">Output</span>
             {result && (
               <span className="font-mono">
-                exit {result.exitCode} · {result.ms}ms
               </span>
             )}
           </div>

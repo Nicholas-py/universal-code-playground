@@ -1,7 +1,7 @@
 import { createServerFn, useServerFn } from "@tanstack/react-start";
 import { env } from 'cloudflare:workers';
 import { UniversalStoreRPC } from "../../durableobj";
-import { interpret } from "./universal-interpreter";
+import { interpretsource } from "./universal-interpreter";
 import { UniversalStore } from "./universal-store";
 /**
  * Thin worker wrapper around the Universal interpreter.
@@ -13,6 +13,7 @@ import { UniversalStore } from "./universal-store";
  *   - input validation
  */
 
+const universalStore = new UniversalStore();
 
 //Run universal code
 export const runUniversal = createServerFn({ method: "POST" })
@@ -22,12 +23,10 @@ export const runUniversal = createServerFn({ method: "POST" })
     return input;
   })
   .handler(async ({ data }) => {
-    const start = Date.now();
-    const universalStore = new UniversalStore();
     await universalStore.sync();
-    const { stdout, stderr, exitCode } = await interpret(data.source, universalStore);
+    const { stdout, stderr } = await interpretsource(data.source, universalStore);
     await universalStore.sync();
-    return { stdout, stderr, exitCode, ms: Date.now() - start };
+    return { stdout, stderr};
   });
 
 // //Get a list of all the universal values
