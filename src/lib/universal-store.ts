@@ -38,7 +38,7 @@ export class UniversalStore {
             return this.masterstore[raw];
         }
 
-        return 'str:'+varname;
+        return 'str:' + varname;
     }
 
     public setValue(varname: string, value: string) {
@@ -65,12 +65,12 @@ export class UniversalStore {
         if (varname.includes("=")) {
             throw new EvalError("= cannot be in variable names")
         }
-        try {
-            //Return numbers straight up
-            parseFloat(varname);
-            return varname
+        console.log(varname, varname.replace(/\d+$/, ""))
+        //Return numbers straight up
+        if (!isNaN(parseFloat(varname))) {
+            return varname;
         }
-        catch {}
+
         return varname.replace(/\d+$/, "");
     }
 
