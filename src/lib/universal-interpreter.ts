@@ -1,6 +1,5 @@
 import { UniversalStore } from "./universal-store";
-
-class UniversalError extends Error { }
+import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString } from "./universal-types";
 
 /**
  * This is the actual interpreter
@@ -16,97 +15,12 @@ const storedefaults = {
   "print": "fun:=print"
 }
 
-type UniArg = UniversalObj | undefined
 
-abstract class UniversalObj {
-  public readonly type: string = "bae"
-  protected value: any
-
-  constructor(inp: string, protected interpreter?:Interpreter) {
-    this.value = this.parse(inp);
-  }
-
-  public abstract tostring(): string;
-  public abstract exec(arg: UniArg): UniversalObj;
-
-  public abstract hash(): string;
-  public abstract parse(arg: string): any;
-
-}
-
-class UNumber extends UniversalObj {
-  public readonly type: string = "num"
-  declare protected value: number;
-
-  public tostring(): string {
-    return this.value.toString();
-  }
-  public hash(): string {
-    return this.value.toString();
-  }
-  public exec(arg: UniArg): UniversalObj {
-    if (arg !== undefined) {
-      throw new UniversalError("Cannot execute number with value");
-    }
-    return this;
-  }
-  parse(arg: string): number {
-    return parseFloat(arg);
-  }
-}
-
-class UString extends UniversalObj {
-  public readonly type: string = "str"
-  declare protected value: string;
-
-  public tostring(): string {
-    return this.value;
-  }
-
-  public exec(arg: UniArg): UniversalObj {
-    if (arg !== undefined) {
-      throw new UniversalError("Cannot execute string with value");
-    }
-    return this;
-  }
-
-  public hash(): string {
-    return this.value.toString();
-  }
-
-  public parse(arg: string): string {
-    return arg;
-  }
-}
-
-class UFunctionBuiltin extends UniversalObj {
-  public readonly type: string = "fub"
-  declare protected value: Function;
-
-  public tostring(): string {
-    return this.value.name;
-  }
-
-  public exec(arg: UniArg): UniversalObj {
-    return this.value(arg, this.interpreter);
-  }
-
-  public hash(): string {
-    return this.value.name;
-  }
-
-  public parse(arg: string): Function {
-    return this.interpreter!.builtins[arg];
-  }
-}
-
-
-
-class Interpreter {
+export class Interpreter {
   stdout: string[] = []
 
   builtins: Record<string, Function> = { "print": this.print }
-  types = { "num": UNumber, "str":UString,"fub":UFunctionBuiltin } as const
+  static types = { "num": UNumber, "str": UString, "fub": UFunctionBuiltin, "lzt": ULiszt } as const
 
 
   constructor(private source: string, private store: UniversalStore) {
@@ -127,7 +41,7 @@ class Interpreter {
   interpret(code: string): UniversalObj {
     let lines = code.trim().split('\n');
 
-    console.log("exec",code)
+    console.log("exec", code)
 
     //Multiple lines? Run each in sequence, and do nothing with result
     if (lines.length > 1) {
@@ -141,7 +55,7 @@ class Interpreter {
     }
 
     if (code.trim().length == 0) {
-      return new UString("",this)
+      return new UString("", this)
     }
 
 
@@ -215,12 +129,12 @@ class Interpreter {
       return new UFunctionBuiltin(value.slice(1), this)
     }
 
-    let cls = this.types[type as keyof typeof this.types];
+    let cls = Interpreter.types[type as keyof typeof Interpreter.types];
     return new cls(value, this)
   }
 
 
-  print(arg: UniArg, interpreter:Interpreter): UniversalObj {
+  print(arg: UniArg, interpreter: Interpreter): UniversalObj {
     if (arg == undefined) {
       return new UString("", this);
     }
@@ -261,11 +175,11 @@ export async function interpretsource(source: string, store: UniversalStore): Pr
     }
   }
 
-  out += interpreter.stdout.join('\n')+'\n'
+  out += interpreter.stdout.join('\n') + '\n'
 
 
-  return {stdout:out, stderr:err}
-  
+  return { stdout: out, stderr: err }
+
 
 
   const locals = new Map<string, string>();
@@ -312,9 +226,9 @@ export async function interpretsource(source: string, store: UniversalStore): Pr
         continue;
       }
       if (isUniversal) {
-       // store.setValue(name, value);
+        // store.setValue(name, value);
       } else {
-   //     locals.set(name, value);
+        //     locals.set(name, value);
       }
       continue;
     }
