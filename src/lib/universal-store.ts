@@ -15,7 +15,6 @@ export class UniversalStore {
     private mchanges: Record<string, string> = {}
 
     public async sync() {
-        this.reset();
         let json = { full: { ...this.fchanges }, master: { ...this.mchanges } };
         await this.setglobal(json);
 

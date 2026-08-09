@@ -1,3 +1,4 @@
+import { debug } from "console";
 import { Interpreter } from "./universal-interpreter";
 
 
@@ -102,10 +103,14 @@ export class ULiszt extends UniversalObj {
     public hashval(inp: UniversalObj[]): string {
         let st = ""
         inp.forEach((obj) => {
-            let ohash = obj.hash().replace(',', ',,');
+            let ohash = obj.hash().replace(/,/g, ',,');
             st += obj.type + ':' + ohash + ',';
+            if (obj instanceof ULiszt) {
+                console.log(inp, st)
+            }
         })
-        return st;
+        
+        return st.slice(0,st.length-1);
     }
 
 
@@ -113,8 +118,11 @@ export class ULiszt extends UniversalObj {
         if (arg === undefined) {
             return this;
         }
-        return new ULiszt(this.hash() + ',' + arg.hash());
-    }
+
+        let hash = this.hashval([arg].concat(this.value))
+        console.log(hash)
+        return new ULiszt(hash);
+    } 
 
 
     parse(arg: string): UniversalObj[] {
@@ -130,7 +138,7 @@ export class ULiszt extends UniversalObj {
                 return
             }
             let type = hash.slice(0, 3);
-            let rest = hash.slice(4).replace(',,', ',');
+            let rest = hash.slice(4).replace(/,,/g, ',');
             let cls = Interpreter.types[type as keyof typeof Interpreter.types];
             toreturn.push(new cls(rest, this.interpreter))
         })

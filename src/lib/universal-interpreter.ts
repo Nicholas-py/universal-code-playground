@@ -31,7 +31,6 @@ export class Interpreter {
       this.store.setValue(key, storedefaults[key as keyof typeof storedefaults])
     })
 
-
     this.interpret(this.source);
 
   }
@@ -41,7 +40,7 @@ export class Interpreter {
     let lines = code.split('\n');
 
 
-    //Multiple lines? Run each in sequence, and do nothing with result
+    //Multiple lines? Run each in sequence, and return the final result (which will usually be ignored)
     if (lines.length > 1) {
       let lastval: UniversalObj = new UString("", this);
       lines.forEach((line) => {
