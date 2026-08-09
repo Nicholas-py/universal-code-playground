@@ -65,7 +65,6 @@ export class UniversalStore {
         if (varname.includes("=")) {
             throw new EvalError("= cannot be in variable names")
         }
-        console.log(varname, varname.replace(/\d+$/, ""))
         //Return numbers straight up
         if (!isNaN(parseFloat(varname))) {
             return varname;

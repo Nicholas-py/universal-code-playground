@@ -23,12 +23,10 @@ export class Interpreter {
   static types = { "num": UNumber, "str": UString, "fub": UFunctionBuiltin, "lzt": ULiszt } as const
 
 
-  constructor(private source: string, private store: UniversalStore) {
-  }
+  constructor(private source: string, private store: UniversalStore) {}
 
   async run() {
 
-    this.store.reset();
     Object.keys(storedefaults).forEach((key) => {
       this.store.setValue(key, storedefaults[key as keyof typeof storedefaults])
     })
@@ -39,9 +37,9 @@ export class Interpreter {
   }
 
   interpret(code: string): UniversalObj {
-    let lines = code.trim().split('\n');
+    code = code.trim()
+    let lines = code.split('\n');
 
-    console.log("exec", code)
 
     //Multiple lines? Run each in sequence, and do nothing with result
     if (lines.length > 1) {
@@ -54,14 +52,14 @@ export class Interpreter {
       return lastval;
     }
 
-    if (code.trim().length == 0) {
+    if (code.length == 0) {
       return new UString("", this)
     }
 
 
     //Set value
     if (code.includes('=')) {
-      const lst = code.trim().split('=')
+      const lst = code.split('=')
       if (lst.length > 2) {
         throw new UniversalError("Only 1 equals sign per line");
       }
@@ -88,9 +86,8 @@ export class Interpreter {
       return val;
     }
 
-
+    //Run commands
     else {
-      console.log(this.store.listKeys())
       let tokens = code.split(' ');
       let curobj: UniversalObj = this.createobj(tokens[tokens.length - 1])
       for (let i = tokens.length - 2; i >= 0; i--) {
@@ -101,13 +98,10 @@ export class Interpreter {
         try {
           curobj = newobj.exec(curobj)
         } catch {
-
           try {
             curobj = curobj!.exec(newobj)
           } catch {
-            console.log("Fallback")
-            //TODO - replace with list [newobj, curobj]
-            curobj = new UString(`List(${newobj}, ${curobj})`, this)
+            curobj = new ULiszt(ULiszt.empty.hashval([newobj, curobj]), this)
           }
         }
       }

@@ -26,9 +26,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const DEFAULT_CODE = `print hello
-print world
-`;
+const DEFAULT_CODE = `print hello world`;
 
 type RunResult = {
   stdout: string;
@@ -99,7 +97,7 @@ function Home() {
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Be part of a revolution in programming, with Universal. With intuitive syntax,
             cloud-synced data and 100% customizability, Universal gives you unprecendented power over
-            your code, while preserving ease of use.
+            your code, while dramatically enhancing usability.
           </p>
         </section>
 
