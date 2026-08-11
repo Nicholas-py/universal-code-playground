@@ -8,7 +8,7 @@ export type UniArg = UniversalObj | undefined
 
 export abstract class UniversalObj {
     public readonly type: string = "bae"
-    protected value: any
+    public value: any
 
     constructor(inp: string, protected interpreter?: Interpreter) {
         this.value = this.parse(inp);
@@ -27,7 +27,7 @@ export abstract class UniversalObj {
 
 export class UNumber extends UniversalObj {
     public readonly type: string = "num"
-    declare protected value: number;
+    declare public value: number;
 
     public tostring(): string {
         return this.value.toString();
@@ -48,7 +48,7 @@ export class UNumber extends UniversalObj {
 
 export class UString extends UniversalObj {
     public readonly type: string = "str"
-    declare protected value: string;
+    declare public value: string;
 
     public tostring(): string {
         return this.value;
@@ -72,22 +72,22 @@ export class UString extends UniversalObj {
 
 export class UFunctionBuiltin extends UniversalObj {
     public readonly type: string = "fub"
-    declare protected value: Function;
+    declare public value: string;
 
     public tostring(): string {
-        return this.value.name;
+        return this.value;
     }
 
     public exec(arg: UniArg): UniversalObj {
-        return this.value(arg, this.interpreter);
+        return this.interpreter!.builtins[this.value](arg, this.interpreter);
     }
 
-    public hashval(inp: Function): string {
-        return inp.name;
+    public hashval(inp: string): string {
+        return inp;
     }
 
-    public parse(arg: string): Function {
-        return this.interpreter!.builtins[arg];
+    public parse(arg: string): string {
+        return arg;
     }
 }
 
@@ -95,7 +95,7 @@ export class ULiszt extends UniversalObj {
     public static empty: ULiszt = new ULiszt('')
 
     public readonly type: string = "lzt"
-    declare protected value: UniversalObj[];
+    declare public value: UniversalObj[];
 
     public tostring(): string {
         return this.value.map((obj) => { return obj.tostring() }).join(' ')
@@ -109,8 +109,8 @@ export class ULiszt extends UniversalObj {
                 console.log(inp, st)
             }
         })
-        
-        return st.slice(0,st.length-1);
+
+        return st.slice(0, st.length - 1);
     }
 
 
@@ -122,7 +122,7 @@ export class ULiszt extends UniversalObj {
         let hash = this.hashval([arg].concat(this.value))
         console.log(hash)
         return new ULiszt(hash);
-    } 
+    }
 
 
     parse(arg: string): UniversalObj[] {
@@ -146,3 +146,46 @@ export class ULiszt extends UniversalObj {
     }
 }
 
+
+export class UFunctionLambda extends UniversalObj {
+    public readonly type: string = "ful"
+    declare public value: { func: string, val: UniversalObj };
+
+    public static empty = new UFunctionLambda('')
+
+    public tostring(): string {
+        return `${this.value.func} ${this.value.val.tostring()}`;
+    }
+
+    public exec(arg: UniArg): UniversalObj {
+        if (arg == undefined) {
+            return this;
+        }
+        return this.interpreter!.builtins[this.value.func]([arg, this.value.val])
+    }
+
+    public hashval(inp: { func: string, val: UniversalObj }): string {
+        let valhash = inp.val.hash().replace(/,/g, ',,');
+        return `${inp.func},${inp.val.type}:${valhash}`;
+    }
+
+    public parse(arg: string): { func: string, val: UniversalObj } {
+        if (arg == '') {
+            return {func: '', val:new UString('')}
+        }
+
+        let lst = arg.split(/(?<!,),(?!,)/)
+        if (lst.length != 2) {
+            throw Error("lambda function hash incorrect")
+        }
+
+        let func = lst[0]
+        let hash = lst[1]
+        let type = hash.slice(0, 3);
+        let rest = hash.slice(4).replace(/,,/g, ',');
+        let cls = Interpreter.types[type as keyof typeof Interpreter.types];
+        let obj = (new cls(rest, this.interpreter))
+
+        return {func:func, val:obj};
+    }
+}

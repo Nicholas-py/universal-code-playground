@@ -36,7 +36,11 @@ export class UniversalStore {
         if (raw in this.masterstore) {
             return this.masterstore[raw];
         }
-
+        //Return numbers as numbers
+        if (UniversalStore.isNumber(varname)) {
+            return 'num:' + varname
+        }
+        //Return string of variable name
         return 'str:' + varname;
     }
 
@@ -65,7 +69,7 @@ export class UniversalStore {
             throw new EvalError("= cannot be in variable names")
         }
         //Return numbers straight up
-        if (!isNaN(parseFloat(varname))) {
+        if (UniversalStore.isNumber(varname)) {
             return varname;
         }
 
@@ -88,6 +92,10 @@ export class UniversalStore {
 
     }
 
+    static isNumber(str: string):boolean {
+        if (typeof str !== 'string' || str.trim() === '') return false;
+        return !isNaN(Number(str));
+    }
 }
 
 

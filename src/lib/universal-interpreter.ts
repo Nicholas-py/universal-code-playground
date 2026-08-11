@@ -1,5 +1,5 @@
 import { UniversalStore } from "./universal-store";
-import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString } from "./universal-types";
+import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString, UFunctionLambda } from "./universal-types";
 
 /**
  * This is the actual interpreter
@@ -12,18 +12,29 @@ import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber
 const storedefaults = {
   "hello": "str:Hello",
   "world": "str:World!",
-  "print": "fun:=print"
+  "print": "fub:=print",
+  "+": "fub:=+"
 }
 
 
 export class Interpreter {
   stdout: string[] = []
 
-  builtins: Record<string, Function> = { "print": this.print }
-  static types = { "num": UNumber, "str": UString, "fub": UFunctionBuiltin, "lzt": ULiszt } as const
+  builtins: Record<string, Function> = {
+    "print": this.print.bind(this),
+    "+": this.plus.bind(this)
+  }
+
+  static types = {
+    "num": UNumber,
+    "str": UString,
+    "fub": UFunctionBuiltin,
+    "lzt": ULiszt,
+    "ful": UFunctionLambda
+  } as const
 
 
-  constructor(private source: string, private store: UniversalStore) {}
+  constructor(private source: string, private store: UniversalStore) { }
 
   async run() {
 
@@ -96,11 +107,15 @@ export class Interpreter {
         let newobj = this.createobj(tokens[i])
         try {
           curobj = newobj.exec(curobj)
+          console.log(`${newobj.type}(${curobj.type})`)
         } catch {
           try {
-            curobj = curobj!.exec(newobj)
+            curobj = curobj.exec(newobj)
+            console.log(`${curobj.type}(${newobj.type})`)
+
           } catch {
             curobj = new ULiszt(ULiszt.empty.hashval([newobj, curobj]), this)
+            console.log(`[${newobj.type},${curobj.type}]`)
           }
         }
       }
@@ -129,10 +144,33 @@ export class Interpreter {
 
   print(arg: UniArg, interpreter: Interpreter): UniversalObj {
     if (arg == undefined) {
-      return new UString("", this);
+      return new UFunctionBuiltin("print", interpreter);
     }
     interpreter.stdout.push(arg.tostring());
     return new UString(arg.tostring(), this);
+  }
+
+  plus(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    if (arg == undefined) {
+      return new UFunctionBuiltin("+", interpreter);
+    }
+    else if (arg instanceof UniversalObj) {
+      let hash = UFunctionLambda.empty.hashval({ func: '+', val: arg })
+      return new UFunctionLambda(hash, this)
+    }
+    else {
+      if (arg.length != 2) {
+        throw new Error("Must be two arguments to plus()")
+      }
+      if (arg[0] instanceof UNumber && arg[1] instanceof UNumber) {
+        return new UNumber((arg[0].value + arg[1].value).toString(), this)
+      }
+      if (arg[0] instanceof ULiszt && arg[1] instanceof ULiszt) {
+        return new ULiszt(ULiszt.empty.hashval(arg[0].value.concat(arg[1].value)), this)
+      }
+      return new UString(arg[0].tostring() + arg[1].tostring(), this)
+    }
+
   }
 }
 
