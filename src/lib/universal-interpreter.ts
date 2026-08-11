@@ -13,11 +13,18 @@ import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber
 const storedefaults = {
   "hello": "str:Hello",
   "world": "str:World!",
+  "true":"num:1",
+  "false":"num:0",
+
   "print": "fub:=print",
   "+": "fub:=+",
   "-": "fub:=-",
   "*": "fub:=*",
-  "/": "fub:=/"
+  "/": "fub:=/",
+  "get":"fub:=get",
+  "type": "fub:=type",
+  "equals":"fub:=equals",
+  "not":"fub:=not"
 }
 
 
@@ -29,7 +36,11 @@ export class Interpreter {
     "+": UniversalBuiltins.plus,
     "-": UniversalBuiltins.minus,
     "*": UniversalBuiltins.times,
-    "/": UniversalBuiltins.divide
+    "/": UniversalBuiltins.divide,
+    "equals": UniversalBuiltins.equals,
+    "get":UniversalBuiltins.getval,
+    "type":UniversalBuiltins.gettype,
+    "not":UniversalBuiltins.not
   }
 
   static types = {
@@ -37,7 +48,8 @@ export class Interpreter {
     "str": UString,
     "fub": UFunctionBuiltin,
     "lzt": ULiszt,
-    "ful": UFunctionLambda
+    "ful": UFunctionLambda,
+    "fun": UFunctionBuiltin
   } as const
 
 
