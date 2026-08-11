@@ -1,3 +1,4 @@
+import { UniversalBuiltins } from "./universal-builtins";
 import { UniversalStore } from "./universal-store";
 import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString, UFunctionLambda } from "./universal-types";
 
@@ -21,8 +22,8 @@ export class Interpreter {
   stdout: string[] = []
 
   builtins: Record<string, Function> = {
-    "print": this.print.bind(this),
-    "+": this.plus.bind(this)
+    "print": UniversalBuiltins.print,
+    "+": UniversalBuiltins.plus
   }
 
   static types = {
@@ -142,36 +143,7 @@ export class Interpreter {
   }
 
 
-  print(arg: UniArg, interpreter: Interpreter): UniversalObj {
-    if (arg == undefined) {
-      return new UFunctionBuiltin("print", interpreter);
-    }
-    interpreter.stdout.push(arg.tostring());
-    return new UString(arg.tostring(), this);
-  }
 
-  plus(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
-    if (arg == undefined) {
-      return new UFunctionBuiltin("+", interpreter);
-    }
-    else if (arg instanceof UniversalObj) {
-      let hash = UFunctionLambda.empty.hashval({ func: '+', val: arg })
-      return new UFunctionLambda(hash, this)
-    }
-    else {
-      if (arg.length != 2) {
-        throw new Error("Must be two arguments to plus()")
-      }
-      if (arg[0] instanceof UNumber && arg[1] instanceof UNumber) {
-        return new UNumber((arg[0].value + arg[1].value).toString(), this)
-      }
-      if (arg[0] instanceof ULiszt && arg[1] instanceof ULiszt) {
-        return new ULiszt(ULiszt.empty.hashval(arg[0].value.concat(arg[1].value)), this)
-      }
-      return new UString(arg[0].tostring() + arg[1].tostring(), this)
-    }
-
-  }
 }
 
 
