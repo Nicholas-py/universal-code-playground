@@ -14,7 +14,10 @@ const storedefaults = {
   "hello": "str:Hello",
   "world": "str:World!",
   "print": "fub:=print",
-  "+": "fub:=+"
+  "+": "fub:=+",
+  "-": "fub:=-",
+  "*": "fub:=*",
+  "/": "fub:=/"
 }
 
 
@@ -23,7 +26,10 @@ export class Interpreter {
 
   builtins: Record<string, Function> = {
     "print": UniversalBuiltins.print,
-    "+": UniversalBuiltins.plus
+    "+": UniversalBuiltins.plus,
+    "-": UniversalBuiltins.minus,
+    "*": UniversalBuiltins.times,
+    "/": UniversalBuiltins.divide
   }
 
   static types = {
@@ -42,7 +48,7 @@ export class Interpreter {
     Object.keys(storedefaults).forEach((key) => {
       this.store.setValue(key, storedefaults[key as keyof typeof storedefaults])
     })
-
+    console.log('\n~~~ Run begins ~~~')
     this.interpret(this.source);
 
   }
@@ -106,17 +112,18 @@ export class Interpreter {
           continue;
         }
         let newobj = this.createobj(tokens[i])
+        let ctype = curobj.type;
         try {
           curobj = newobj.exec(curobj)
-          console.log(`${newobj.type}(${curobj.type})`)
+          console.log(`${newobj.type} (${ctype})`,tokens.slice(i).join(' '))
         } catch {
           try {
             curobj = curobj.exec(newobj)
-            console.log(`${curobj.type}(${newobj.type})`)
+            console.log(`(${newobj.type}) ${ctype}`,tokens.slice(i).join(' '))
 
           } catch {
             curobj = new ULiszt(ULiszt.empty.hashval([newobj, curobj]), this)
-            console.log(`[${newobj.type},${curobj.type}]`)
+            console.log(`[${newobj.type},${ctype}]`,tokens.slice(i).join(' '))
           }
         }
       }

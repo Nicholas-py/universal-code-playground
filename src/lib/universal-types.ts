@@ -105,9 +105,6 @@ export class ULiszt extends UniversalObj {
         inp.forEach((obj) => {
             let ohash = obj.hash().replace(/,/g, ',,');
             st += obj.type + ':' + ohash + ',';
-            if (obj instanceof ULiszt) {
-                console.log(inp, st)
-            }
         })
 
         return st.slice(0, st.length - 1);
@@ -118,9 +115,11 @@ export class ULiszt extends UniversalObj {
         if (arg === undefined) {
             return this;
         }
+        if (arg instanceof UFunctionLambda) {
+            throw new UniversalError("liszt + lambda function error")
+        }
 
         let hash = this.hashval([arg].concat(this.value))
-        console.log(hash)
         return new ULiszt(hash);
     }
 
