@@ -13,18 +13,19 @@ import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber
 const storedefaults = {
   "hello": "str:Hello",
   "world": "str:World!",
-  "true":"num:1",
-  "false":"num:0",
+  "true": "num:1",
+  "false": "num:0",
 
   "print": "fub:=print",
   "+": "fub:=+",
   "-": "fub:=-",
   "*": "fub:=*",
   "/": "fub:=/",
-  "get":"fub:=get",
+  "get": "fub:=get",
   "type": "fub:=type",
-  "equals":"fub:=equals",
-  "not":"fub:=not"
+  "equals": "fub:=equals",
+  "not": "fub:=not",
+  "len":"fub:=len"
 }
 
 
@@ -38,9 +39,10 @@ export class Interpreter {
     "*": UniversalBuiltins.times,
     "/": UniversalBuiltins.divide,
     "equals": UniversalBuiltins.equals,
-    "get":UniversalBuiltins.getval,
-    "type":UniversalBuiltins.gettype,
-    "not":UniversalBuiltins.not
+    "get": UniversalBuiltins.getval,
+    "type": UniversalBuiltins.gettype,
+    "not": UniversalBuiltins.not,
+    "len": UniversalBuiltins.len
   }
 
   static types = {
@@ -65,7 +67,7 @@ export class Interpreter {
 
   }
 
-  interpret(code: string): UniversalObj {
+  interpret(code: string, indentedlines: string = ""): UniversalObj {
     code = code.trim()
     let lines = code.split('\n');
 
@@ -73,10 +75,27 @@ export class Interpreter {
     //Multiple lines? Run each in sequence, and return the final result (which will usually be ignored)
     if (lines.length > 1) {
       let lastval: UniversalObj = new UString("", this);
+
+      let actionlines: { line: string, indents: string[] }[] = []
+      let indentamount = 0
       lines.forEach((line) => {
-        if (line.trim().length > 0)
-          lastval = this.interpret(line.trim());
+        if (line.trim().length == 0) { return; }
+
+        if (this.getindent(line) == 0) {
+          actionlines.push({ line: line, indents: [] })
+          indentamount = 0
+        }
+        else {
+          if (indentamount == 0) {
+            indentamount = this.getindent(line)
+          }
+          actionlines[actionlines.length - 1].indents.push(this.removeindent(line, indentamount))
+        }
       });
+
+      actionlines.forEach((data) => {
+        lastval = this.interpret(data.line.trim(), data.indents.join('\n'));
+      })
 
       return lastval;
     }
@@ -127,15 +146,15 @@ export class Interpreter {
         let ctype = curobj.type;
         try {
           curobj = newobj.exec(curobj)
-          console.log(`${newobj.type} (${ctype})`,tokens.slice(i).join(' '))
+          console.log(`${newobj.type} (${ctype})`, tokens.slice(i).join(' '))
         } catch {
           try {
             curobj = curobj.exec(newobj)
-            console.log(`(${newobj.type}) ${ctype}`,tokens.slice(i).join(' '))
+            console.log(`(${newobj.type}) ${ctype}`, tokens.slice(i).join(' '))
 
           } catch {
             curobj = new ULiszt(ULiszt.empty.hashval([newobj, curobj]), this)
-            console.log(`[${newobj.type},${ctype}]`,tokens.slice(i).join(' '))
+            console.log(`[${newobj.type},${ctype}]`, tokens.slice(i).join(' '))
           }
         }
       }
@@ -162,6 +181,27 @@ export class Interpreter {
   }
 
 
+  getindent(line: string) {
+    if (line.includes('\n')) {
+      throw new Error("Cannot get indent of multiple lines")
+    }
+    return (line.length - line.trimStart().length)
+  }
+
+  removeindent(line: string, amount: number): string {
+    if (line.includes('\n')) {
+      throw new Error("Cannot set indent of multiple lines")
+    }
+
+    const oldindent = this.getindent(line)
+
+    if (amount > oldindent) {
+      throw new Error("Attempt to remove excessive indent")
+    }
+
+    return ' '.repeat(oldindent - amount) + line.trimStart();
+
+  }
 
 }
 

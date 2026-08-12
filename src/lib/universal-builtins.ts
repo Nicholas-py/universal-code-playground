@@ -268,14 +268,23 @@ export class UniversalBuiltins {
             return new UFunctionBuiltin("not", interpreter);
         }
 
-        let zeros= { "str": "", "num": 0, "lzt": [] }
+        let zeros = { "str": "", "num": 0, "lzt": [] }
 
         if (Object.keys(zeros).includes(arg.type)) {
             if (zeros[arg.type as keyof typeof zeros] == arg.value) {
-                return new UNumber("1",interpreter)
+                return new UNumber("1", interpreter)
             }
         }
         return new UNumber("0", interpreter)
     }
 
+    public static len(arg: UniArg, interpreter: Interpreter): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("len", interpreter);
+        }
+        if (arg instanceof UString || arg instanceof ULiszt) {
+            return new UNumber(arg.value.length.toString(), interpreter)
+        }
+        return new UNumber(arg.tostring().length.toString())
+    }
 }
