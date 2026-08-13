@@ -25,7 +25,8 @@ const storedefaults = {
   "type": "fub:=type",
   "equals": "fub:=equals",
   "not": "fub:=not",
-  "len":"fub:=len"
+  "len": "fub:=len",
+  "if": "fub:=if",
 }
 
 
@@ -42,8 +43,12 @@ export class Interpreter {
     "get": UniversalBuiltins.getval,
     "type": UniversalBuiltins.gettype,
     "not": UniversalBuiltins.not,
-    "len": UniversalBuiltins.len
+    "len": UniversalBuiltins.len,
+    "if": UniversalBuiltins.if,
+
   }
+
+  actions: string[] = ['if', 'while', 'function', 'for'];
 
   static types = {
     "num": UNumber,
@@ -51,7 +56,7 @@ export class Interpreter {
     "fub": UFunctionBuiltin,
     "lzt": ULiszt,
     "ful": UFunctionLambda,
-    "fun": UFunctionBuiltin
+    "fun": UFunctionBuiltin //TODO - UFunction class
   } as const
 
 
@@ -145,11 +150,11 @@ export class Interpreter {
         let newobj = this.createobj(tokens[i])
         let ctype = curobj.type;
         try {
-          curobj = newobj.exec(curobj)
+          curobj = newobj.exec(curobj, indentedlines)
           console.log(`${newobj.type} (${ctype})`, tokens.slice(i).join(' '))
         } catch {
           try {
-            curobj = curobj.exec(newobj)
+            curobj = curobj.exec(newobj, indentedlines)
             console.log(`(${newobj.type}) ${ctype}`, tokens.slice(i).join(' '))
 
           } catch {

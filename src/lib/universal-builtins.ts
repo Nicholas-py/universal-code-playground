@@ -220,6 +220,8 @@ export class UniversalBuiltins {
         }
     }
 
+
+
     public static equals(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("equals", interpreter);
@@ -253,7 +255,7 @@ export class UniversalBuiltins {
                 return false;
             }
             for (let i = 0; i < a.value.length; i++) {
-                if (!this.areequal(a.value[i], b.value[i])) {
+                if (!UniversalBuiltins.areequal(a.value[i], b.value[i])) {
                     return false
                 }
             }
@@ -267,15 +269,22 @@ export class UniversalBuiltins {
         if (arg == undefined) {
             return new UFunctionBuiltin("not", interpreter);
         }
+        if (UniversalBuiltins.isTrue(arg)) {
+            return new UNumber("0", interpreter)
+        }
+        else {
+            return new UNumber("1", interpreter)
+        }
+    }
 
+    private static isTrue(obj: UniversalObj): boolean {
         let zeros = { "str": "", "num": 0, "lzt": [] }
-
-        if (Object.keys(zeros).includes(arg.type)) {
-            if (zeros[arg.type as keyof typeof zeros] == arg.value) {
-                return new UNumber("1", interpreter)
+        if (Object.keys(zeros).includes(obj.type)) {
+            if (zeros[obj.type as keyof typeof zeros] == obj.value) {
+                return false;
             }
         }
-        return new UNumber("0", interpreter)
+        return true;
     }
 
     public static len(arg: UniArg, interpreter: Interpreter): UniversalObj {
@@ -287,4 +296,36 @@ export class UniversalBuiltins {
         }
         return new UNumber(arg.tostring().length.toString())
     }
+
+    public static if(arg: UniArg, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("if", interpreter);
+        }
+        if (UniversalBuiltins.isTrue(arg)) {
+            return interpreter.interpret(indentedlines)
+        }
+        return new UNumber("0", interpreter);
+
+    }
+
+    public static while(arg: UniArg, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("while", interpreter);
+        }
+        console.log("hi")
+        let lastval = new UString("while", interpreter);
+        for (let i = 0; i < 100; i++) {
+            console.log(i,arg.value, UniversalBuiltins.isTrue(arg))
+            if (UniversalBuiltins.isTrue(arg)) {
+                lastval = interpreter.interpret(indentedlines)
+            }
+            else {
+                return lastval
+            }
+        }
+        return new UString("Infinite loop detected")
+
+    }
+
+
 }

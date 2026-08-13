@@ -15,7 +15,7 @@ export abstract class UniversalObj {
     }
 
     public abstract tostring(): string;
-    public abstract exec(arg: UniArg): UniversalObj;
+    public abstract exec(arg: UniArg, indentedlines?:string): UniversalObj;
 
     public abstract hashval(inp: any): string;
     public hash(): string {
@@ -70,26 +70,6 @@ export class UString extends UniversalObj {
     }
 }
 
-export class UFunctionBuiltin extends UniversalObj {
-    public readonly type: string = "fub"
-    declare public value: string;
-
-    public tostring(): string {
-        return this.value;
-    }
-
-    public exec(arg: UniArg): UniversalObj {
-        return this.interpreter!.builtins[this.value](arg, this.interpreter);
-    }
-
-    public hashval(inp: string): string {
-        return inp;
-    }
-
-    public parse(arg: string): string {
-        return arg;
-    }
-}
 
 export class ULiszt extends UniversalObj {
     public static empty: ULiszt = new ULiszt('')
@@ -142,6 +122,30 @@ export class ULiszt extends UniversalObj {
             toreturn.push(new cls(rest, this.interpreter))
         })
         return toreturn;
+    }
+}
+
+export class UFunctionBuiltin extends UniversalObj {
+    public readonly type: string = "fub"
+    declare public value: string;
+
+    public tostring(): string {
+        return this.value;
+    }
+
+    public exec(arg: UniArg, indentedlines=""): UniversalObj {
+        if (this.interpreter!.actions.includes(this.value)) {
+            return this.interpreter!.builtins[this.value](arg, this.interpreter, indentedlines);
+        }
+        return this.interpreter!.builtins[this.value](arg, this.interpreter);
+    }
+
+    public hashval(inp: string): string {
+        return inp;
+    }
+
+    public parse(arg: string): string {
+        return arg;
     }
 }
 
