@@ -1,6 +1,6 @@
 import { UniversalBuiltins } from "./universal-builtins";
 import { UniversalStore } from "./universal-store";
-import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString, UFunctionLambda } from "./universal-types";
+import { UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString, UFunctionLambda, UFunction } from "./universal-types";
 
 /**
  * This is the actual interpreter
@@ -15,6 +15,7 @@ const storedefaults = {
   "world": "str:World!",
   "true": "num:1",
   "false": "num:0",
+  "()": "str:",
 
   "print": "fub:=print",
   "+": "fub:=+",
@@ -27,6 +28,7 @@ const storedefaults = {
   "not": "fub:=not",
   "len": "fub:=len",
   "if": "fub:=if",
+  "function": "fub:=function"
 }
 
 
@@ -45,6 +47,7 @@ export class Interpreter {
     "not": UniversalBuiltins.not,
     "len": UniversalBuiltins.len,
     "if": UniversalBuiltins.if,
+    "function": UniversalBuiltins.function
 
   }
 
@@ -56,7 +59,7 @@ export class Interpreter {
     "fub": UFunctionBuiltin,
     "lzt": ULiszt,
     "ful": UFunctionLambda,
-    "fun": UFunctionBuiltin //TODO - UFunction class
+    "fun": UFunction //TODO - UFunction class
   } as const
 
 
@@ -68,11 +71,11 @@ export class Interpreter {
       this.store.setValue(key, storedefaults[key as keyof typeof storedefaults])
     })
     console.log('\n~~~ Run begins ~~~')
-    this.interpret(this.source);
+    this.interpret(this.source, "");
 
   }
 
-  interpret(code: string, indentedlines: string = ""): UniversalObj {
+  interpret(code: string, indentedlines: string): UniversalObj {
     code = code.trim()
     let lines = code.split('\n');
 
@@ -97,11 +100,12 @@ export class Interpreter {
           actionlines[actionlines.length - 1].indents.push(this.removeindent(line, indentamount))
         }
       });
+      console.log('action!', actionlines)
 
       actionlines.forEach((data) => {
+        console.log(data.line.trim(), '=>', data.indents.join('\n'))
         lastval = this.interpret(data.line.trim(), data.indents.join('\n'));
       })
-
       return lastval;
     }
 
@@ -124,17 +128,11 @@ export class Interpreter {
       lst[1] = lst[1].trim();
 
       let key;
-      if (lst[0].includes(' ')) {
-        key = this.interpret(lst[0]).tostring();
-      }
-      else {
-        key = lst[0];
-      }
+      key = lst[0];
 
-      let val: UniversalObj = this.interpret(lst[1])
-      let valhash = val.type + ':' + val.hash();
 
-      this.store.setValue(key, valhash);
+      let val: UniversalObj = this.interpret(lst[1], indentedlines)
+      this.setvariable(key, val);
 
       return val;
     }
@@ -143,6 +141,8 @@ export class Interpreter {
     else {
       let tokens = code.split(' ');
       let curobj: UniversalObj = this.createobj(tokens[tokens.length - 1])
+      //Optional - execute single arguments (curobj = curobj.exec(undefined))
+      console.log('interpreting', code, 'with', indentedlines)
       for (let i = tokens.length - 2; i >= 0; i--) {
         if (tokens[i].trim().length == 0) {
           continue;
@@ -170,12 +170,19 @@ export class Interpreter {
 
   }
 
+  setvariable(key: string, obj: UniversalObj) {
+    let valhash = obj.type + ':' + obj.hash();
+
+    this.store.setValue(key, valhash);
+
+  }
+
   createobj(token: string): UniversalObj {
     let storestr = this.store.getValue(token);
-    //split at first instance of :
-    let lst = storestr.split(/:(.*)/s)
-    let type = lst[0]; let value = lst[1];
 
+    //Type = 3 letter prefix, value = rest
+    let type = storestr.slice(0, 3);
+    let value = storestr.slice(4);
 
     if (value.length > 0 && value[0] == '=') {
       return new UFunctionBuiltin(value.slice(1), this)

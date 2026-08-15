@@ -1,10 +1,10 @@
-import { UniArg, UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString, UFunctionLambda } from "./universal-types";
+import { UFunctionBuiltin, ULiszt, UniversalError, UniversalObj, UNumber, UString, UFunctionLambda, UFunction } from "./universal-types";
 import { Interpreter } from "./universal-interpreter";
 
 
 export class UniversalBuiltins {
 
-    public static print(arg: UniArg, interpreter: Interpreter): UniversalObj {
+    public static print(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("print", interpreter);
         }
@@ -14,7 +14,7 @@ export class UniversalBuiltins {
 
 
 
-    public static gettype(arg: UniArg, interpreter: Interpreter): UniversalObj {
+    public static gettype(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("gettype", interpreter);
         }
@@ -23,7 +23,7 @@ export class UniversalBuiltins {
 
 
 
-    public static plus(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    public static plus(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("+", interpreter);
         }
@@ -55,7 +55,7 @@ export class UniversalBuiltins {
 
 
 
-    public static minus(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    public static minus(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("-", interpreter);
         }
@@ -99,7 +99,7 @@ export class UniversalBuiltins {
         }
     }
 
-    public static times(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    public static times(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("*", interpreter);
         }
@@ -147,7 +147,7 @@ export class UniversalBuiltins {
             }
         }
     }
-    public static divide(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    public static divide(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("/", interpreter);
         }
@@ -196,7 +196,7 @@ export class UniversalBuiltins {
         }
     }
 
-    public static getval(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    public static getval(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("get", interpreter);
         }
@@ -222,7 +222,7 @@ export class UniversalBuiltins {
 
 
 
-    public static equals(arg: UniArg | UniversalObj[], interpreter: Interpreter): UniversalObj {
+    public static equals(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("equals", interpreter);
         }
@@ -265,7 +265,7 @@ export class UniversalBuiltins {
 
     }
 
-    public static not(arg: UniArg, interpreter: Interpreter): UniversalObj {
+    public static not(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("not", interpreter);
         }
@@ -287,7 +287,7 @@ export class UniversalBuiltins {
         return true;
     }
 
-    public static len(arg: UniArg, interpreter: Interpreter): UniversalObj {
+    public static len(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("len", interpreter);
         }
@@ -297,27 +297,27 @@ export class UniversalBuiltins {
         return new UNumber(arg.tostring().length.toString())
     }
 
-    public static if(arg: UniArg, interpreter: Interpreter, indentedlines: string): UniversalObj {
+    public static if(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("if", interpreter);
         }
         if (UniversalBuiltins.isTrue(arg)) {
-            return interpreter.interpret(indentedlines)
+            return interpreter.interpret(indentedlines,"")
         }
         return new UNumber("0", interpreter);
 
     }
 
-    public static while(arg: UniArg, interpreter: Interpreter, indentedlines: string): UniversalObj {
+    public static while(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("while", interpreter);
         }
         console.log("hi")
         let lastval = new UString("while", interpreter);
         for (let i = 0; i < 100; i++) {
-            console.log(i,arg.value, UniversalBuiltins.isTrue(arg))
+            console.log(i, arg.value, UniversalBuiltins.isTrue(arg))
             if (UniversalBuiltins.isTrue(arg)) {
-                lastval = interpreter.interpret(indentedlines)
+                lastval = interpreter.interpret(indentedlines,"")
             }
             else {
                 return lastval
@@ -327,5 +327,14 @@ export class UniversalBuiltins {
 
     }
 
+
+    public static function(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        console.log('new func:',indentedlines)
+        let func = new UFunction(indentedlines, interpreter);
+        if (arg != undefined) {
+            func.argname = arg.tostring()
+        }
+        return func
+    }
 
 }
