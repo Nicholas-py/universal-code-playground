@@ -302,7 +302,7 @@ export class UniversalBuiltins {
             return new UFunctionBuiltin("if", interpreter);
         }
         if (UniversalBuiltins.isTrue(arg)) {
-            return interpreter.interpret(indentedlines,"")
+            return interpreter.interpret(indentedlines, "")
         }
         return new UNumber("0", interpreter);
 
@@ -312,12 +312,10 @@ export class UniversalBuiltins {
         if (arg == undefined) {
             return new UFunctionBuiltin("while", interpreter);
         }
-        console.log("hi")
-        let lastval = new UString("while", interpreter);
+        let lastval = new UString("whiling", interpreter);
         for (let i = 0; i < 100; i++) {
-            console.log(i, arg.value, UniversalBuiltins.isTrue(arg))
-            if (UniversalBuiltins.isTrue(arg)) {
-                lastval = interpreter.interpret(indentedlines,"")
+            if (UniversalBuiltins.isTrue(arg.exec(lastval))) {
+                lastval = interpreter.interpret(indentedlines, "")
             }
             else {
                 return lastval
@@ -329,11 +327,11 @@ export class UniversalBuiltins {
 
 
     public static function(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
-        console.log('new func:',indentedlines)
-        let func = new UFunction(indentedlines, interpreter);
+        let func = new UFunction(UFunction.empty.hashval({ code: indentedlines, argname: arg.tostring() }), interpreter);
         if (arg != undefined) {
-            func.argname = arg.tostring()
+            func.setargname(arg.tostring())
         }
+        console.log("function created!")
         return func
     }
     public static for(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
