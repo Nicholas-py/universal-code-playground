@@ -348,16 +348,40 @@ export class UniversalBuiltins {
         }
 
         let lastval = new UString("four", interpreter);
-
+        let firstval = arg.value[0]
         let indexname = arg.value[0].tostring()
 
         for (let i = 1; i < arg.value.length; i++) {
             interpreter.setvariable(indexname, arg.value[i])
             lastval = interpreter.interpret(indentedlines, "")
         }
+        interpreter.setvariable(indexname, firstval)
 
         return lastval
     }
 
+    public static range(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        let oplist: UniversalObj[] = []
+        if (arg instanceof UNumber) {
+            for (let i = 0; i < arg.value; i++) {
+                oplist.push(new UNumber(i.toString()));
+            }
+        }
+        else if (arg instanceof ULiszt) {
+            for (let i = 0; i < arg.value.length; i++) {
+                oplist.push(new ULiszt(ULiszt.empty.hashval(arg.value.slice(0, i + 1))))
+            }
+        }
+        else if (arg instanceof UString) {
+            for (let i = 0; i < arg.value.length; i++) {
+                oplist.push(new UString(arg.value.slice(0, i + 1)))
+            }
+        }
+        else {
+            throw new UniversalError("Function call to range")
+        }
+
+        return new ULiszt(ULiszt.empty.hashval(oplist), interpreter)
+    }
 
 }

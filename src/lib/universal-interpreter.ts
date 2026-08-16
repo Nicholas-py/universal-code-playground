@@ -30,7 +30,8 @@ const storedefaults = {
   "if": "fub:=if",
   "for": "fub:=for",
   "while": "fub:=while",
-  "function": "fub:=function"
+  "function": "fub:=function",
+  "range":'fub:=range'
 }
 
 
@@ -51,7 +52,8 @@ export class Interpreter {
     "if": UniversalBuiltins.if,
     "function": UniversalBuiltins.function,
     "while": UniversalBuiltins.while,
-    "for": UniversalBuiltins.for
+    "for": UniversalBuiltins.for,
+    "range": UniversalBuiltins.range
 
   }
 
