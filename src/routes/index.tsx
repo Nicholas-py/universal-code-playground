@@ -41,7 +41,7 @@ function Home() {
   const [code, setCode] = useState(DEFAULT_CODE);
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
-  const [localVariables, setLocalVariables] = useState<Record<string, string>>({});
+  const [localVariables, setLocalVariables] = useState<Map<string, string>>(new Map<string, string>());
   const [displayVariables, setDisplayVariables] = useState<string[]>([]);
 
 
@@ -49,12 +49,18 @@ function Home() {
   const refreshCloud = useCallback(async () => {
     try {
       const res = await getuni();
-      setLocalVariables(res);
+
+      let localrecord:Map<string, string> = new Map<string, string>()
+      Object.keys(res.full).forEach((key) => {
+        localrecord.set(key, res.full[key])
+      })
+      console.log(localrecord)
+      setLocalVariables(localrecord);
     } catch (e) {
 
     }
     //Temporary - set display variables to shuffled version of real ones
-    setDisplayVariables(Object.keys(localVariables).map(value => ({ value, sort: Math.random() }))
+    setDisplayVariables(Array.from(localVariables.keys()).map(value => ({ value, sort: Math.random() }))
       .sort((a, b) => a.sort - b.sort)
       .map(({ value }) => value))
 
@@ -124,7 +130,7 @@ function CloudPanel({
 }: {
   entries: string[];
   onRefresh: () => void;
-  localVariables: Record<string, string>
+  localVariables: Map<string, string>
 }) {
 
   return (
@@ -160,7 +166,7 @@ function CloudPanel({
                 .map((e) => (
                   <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
                     <span className="text-foreground">
-                      <span className="text-primary">{e}</span> = "{localVariables[e]}"
+                      <span className="text-primary">{e}</span> = "{localVariables.get(e)}"
                     </span>
                   </li>
                 ))}
@@ -354,32 +360,6 @@ function PlayIcon() {
   );
 }
 
-function FeatureRow() {
-  const features = [
-    {
-      title: "Readable by default",
-      body: "Syntax that gets out of the way, so the program reads like the idea behind it.",
-    },
-    {
-      title: "Runs anywhere",
-      body: "A single interpreter, no build step, no toolchain to wrestle with.",
-    },
-    {
-      title: "Tiny surface",
-      body: "A focused core you can hold in your head — extend it when you need to.",
-    },
-  ];
-  return (
-    <section id="features" className="mt-20 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
-      {features.map((f) => (
-        <div key={f.title} className="bg-card p-7">
-          <h3 className="font-serif text-xl tracking-tight text-foreground">{f.title}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
-        </div>
-      ))}
-    </section>
-  );
-}
 
 function Footer() {
   return (
