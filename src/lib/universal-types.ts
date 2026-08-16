@@ -1,4 +1,3 @@
-import { debug } from "console";
 import { Interpreter } from "./universal-interpreter";
 
 
@@ -6,6 +5,9 @@ export class UniversalError extends Error { }
 
 export type UniArg = UniversalObj | undefined
 
+
+
+///DO NOT store any data outside of value, it will not save
 export abstract class UniversalObj {
     public readonly type: string = "bae"
     public value: any
@@ -193,28 +195,41 @@ export class UFunctionLambda extends UniversalObj {
     }
 }
 
-
+type UFVal = {code:string, argname:string}
 export class UFunction extends UniversalObj {
     public readonly type: string = "fun"
-    declare public value: string;
-    public argname: string = 'arg';
+    declare public value: UFVal;
+
+
+    public static empty = new UFunction(",")
 
     public tostring(): string {
-        return this.value;
+        return this.value.code;
     }
 
     public exec(arg: UniversalObj, indentedlines = ""): UniversalObj {
         if (arg != undefined) {
-            this.interpreter!.setvariable(this.argname, arg)
+            this.interpreter!.setvariable(this.value.argname, arg)
         }
-        return this.interpreter!.interpret(this.value, indentedlines = indentedlines)
+        return this.interpreter!.interpret(this.value.code, indentedlines = indentedlines)
     }
 
-    public hashval(inp: string): string {
-        return inp;
+    public hashval(inp: UFVal): string {
+        let inphash = inp.code.replace(/,/g,',,')
+        if (!inp.argname) {
+            return `,${inphash}`
+        }
+        return `${inp.argname.replaceAll(',',',,')},${inphash}`
     }
 
-    public parse(arg: string): string {
-        return arg;
+    public parse(arg: string): UFVal {
+        let index = arg.match(/(?<!,),(?!,)/)!.index!
+        let argname = arg.slice(0,index).replace(/,,/g, ',')
+        let code = arg.slice(index+1).replace(/,,/g, ',')
+        return {code:code, argname:argname};
+    }
+
+    public setargname(argname:string) {
+        this.value.argname = argname
     }
 }
