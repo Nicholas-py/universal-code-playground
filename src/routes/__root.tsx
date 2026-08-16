@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import favicon from "../../public/favicon.ico"
+import favicon from "../../favicon.ico"
 
 function NotFoundComponent() {
   return (
