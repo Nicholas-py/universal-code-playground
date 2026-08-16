@@ -336,5 +336,30 @@ export class UniversalBuiltins {
         }
         return func
     }
+    public static for(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("for", interpreter);
+        }
+
+        if (!(arg instanceof ULiszt)) {
+            return UniversalBuiltins.plus([new UNumber('4'), arg], interpreter, indentedlines)
+        }
+
+        if (arg.value.length <= 1) {
+            return new ULiszt(ULiszt.empty.hashval([new UNumber('4')].concat(arg.value)))
+        }
+
+        let lastval = new UString("four", interpreter);
+
+        let indexname = arg.value[0].tostring()
+
+        for (let i = 1; i < arg.value.length; i++) {
+            interpreter.setvariable(indexname, arg.value[i])
+            lastval = interpreter.interpret(indentedlines, "")
+        }
+
+        return lastval
+    }
+
 
 }
