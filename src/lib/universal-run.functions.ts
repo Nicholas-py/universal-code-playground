@@ -17,7 +17,7 @@ const universalStore = new UniversalStore();
 
 //Run universal code
 export const runUniversal = createServerFn({ method: "POST" })
-  .inputValidator((input: { source: string }) => {
+  .validator((input: { source: string }) => {
     if (typeof input?.source !== "string") throw new Error("source must be a string");
     if (input.source.length > 20_000) throw new Error("source too long");
     return input;
