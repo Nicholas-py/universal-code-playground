@@ -28,6 +28,8 @@ const storedefaults = {
   "not": "fub:=not",
   "len": "fub:=len",
   "if": "fub:=if",
+  "for": "fub:=for",
+  "while": "fub:=while",
   "function": "fub:=function"
 }
 
@@ -47,7 +49,9 @@ export class Interpreter {
     "not": UniversalBuiltins.not,
     "len": UniversalBuiltins.len,
     "if": UniversalBuiltins.if,
-    "function": UniversalBuiltins.function
+    "function": UniversalBuiltins.function,
+    "while": UniversalBuiltins.while,
+    "for": UniversalBuiltins.for
 
   }
 
@@ -59,18 +63,20 @@ export class Interpreter {
     "fub": UFunctionBuiltin,
     "lzt": ULiszt,
     "ful": UFunctionLambda,
-    "fun": UFunction //TODO - UFunction class
+    "fun": UFunction 
   } as const
 
+  logging = true;
 
   constructor(private source: string, private store: UniversalStore) { }
 
   async run() {
-
+    console.log("reset defaults")
     Object.keys(storedefaults).forEach((key) => {
       this.store.setValue(key, storedefaults[key as keyof typeof storedefaults])
     })
-    console.log('\n~~~ Run begins ~~~')
+    if (this.logging) { console.log('\n~~~ Run begins ~~~') }
+
     this.interpret(this.source, "");
 
   }
@@ -100,10 +106,8 @@ export class Interpreter {
           actionlines[actionlines.length - 1].indents.push(this.removeindent(line, indentamount))
         }
       });
-      console.log('action!', actionlines)
 
       actionlines.forEach((data) => {
-        console.log(data.line.trim(), '=>', data.indents.join('\n'))
         lastval = this.interpret(data.line.trim(), data.indents.join('\n'));
       })
       return lastval;
@@ -142,7 +146,6 @@ export class Interpreter {
       let tokens = code.split(' ');
       let curobj: UniversalObj = this.createobj(tokens[tokens.length - 1])
       //Optional - execute single arguments (curobj = curobj.exec(undefined))
-      console.log('interpreting', code, 'with', indentedlines)
       for (let i = tokens.length - 2; i >= 0; i--) {
         if (tokens[i].trim().length == 0) {
           continue;
@@ -151,15 +154,15 @@ export class Interpreter {
         let ctype = curobj.type;
         try {
           curobj = newobj.exec(curobj, indentedlines)
-          console.log(`${newobj.type} (${ctype})`, tokens.slice(i).join(' '))
+          if (this.logging) { console.log(`${newobj.type} (${ctype})`, tokens.slice(i).join(' ')) }
         } catch {
           try {
             curobj = curobj.exec(newobj, indentedlines)
-            console.log(`(${newobj.type}) ${ctype}`, tokens.slice(i).join(' '))
+            if (this.logging) { console.log(`(${newobj.type}) ${ctype}`, tokens.slice(i).join(' ')) }
 
           } catch {
             curobj = new ULiszt(ULiszt.empty.hashval([newobj, curobj]), this)
-            console.log(`[${newobj.type},${ctype}]`, tokens.slice(i).join(' '))
+            if (this.logging) { console.log(`[${newobj.type},${ctype}]`, tokens.slice(i).join(' ')) }
           }
         }
       }
@@ -172,8 +175,9 @@ export class Interpreter {
 
   setvariable(key: string, obj: UniversalObj) {
     let valhash = obj.type + ':' + obj.hash();
-
+    console.log(obj.type, obj.hash())
     this.store.setValue(key, valhash);
+    console.log('saving',key, valhash, this.store.getValue('true'))
 
   }
 
