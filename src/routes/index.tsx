@@ -177,7 +177,7 @@ function CloudPanel({
   );
 }
 
-function Header() {
+export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
@@ -186,14 +186,12 @@ function Header() {
           <span className="font-serif text-lg font-medium tracking-tight">Universal</span>
         </a>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          <a className="transition-colors hover:text-foreground" href="#playground">
+          <a className="transition-colors hover:text-foreground" href="/universal/#playground">
             Playground
           </a>
           <a
             className="transition-colors hover:text-foreground"
-            href="https://github.com/Nicholas-py/universal-code-playground"
-            target="_blank"
-            rel="noreferrer"
+            href="/universal/docs"
           >
             Docs
           </a>
@@ -218,7 +216,7 @@ function Header() {
   );
 }
 
-function Logo() {
+export function Logo() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
       <text
@@ -361,7 +359,7 @@ function PlayIcon() {
 }
 
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="border-t border-border/60">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center">

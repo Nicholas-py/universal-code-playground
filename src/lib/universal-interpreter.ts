@@ -16,6 +16,7 @@ const storedefaults = {
   "true": "num:1",
   "false": "num:0",
   "()": "str:",
+  "space":"str: ",
 
   "print": "fub:=print",
   "+": "fub:=+",
