@@ -80,20 +80,18 @@ export class Interpreter {
     })
     if (this.logging) { console.log('\n~~~ Run begins ~~~') }
 
-    this.interpret(this.source, "");
+    this.interpret('\n'+this.source, "");
 
   }
 
   interpret(code: string, indentedlines: string): UniversalObj {
-    code = code.trim()
     let lines = code.split('\n');
-
 
     //Multiple lines? Run each in sequence, and return the final result (which will usually be ignored)
     if (lines.length > 1) {
       let lastval: UniversalObj = new UString("", this);
 
-      let actionlines: { line: string, indents: string[] }[] = []
+      let actionlines: { line: string, indents: string[] }[] = [{line:"", indents:[]}]
       let indentamount = 0
       lines.forEach((line) => {
         if (line.trim().length == 0) { return; }
@@ -108,6 +106,7 @@ export class Interpreter {
           }
           actionlines[actionlines.length - 1].indents.push(this.removeindent(line, indentamount))
         }
+        console.log(actionlines)
       });
 
       actionlines.forEach((data) => {
@@ -116,10 +115,13 @@ export class Interpreter {
       return lastval;
     }
 
+    code = code.trim()
+
     if (code.length == 0) {
       return new UString("", this)
     }
 
+    
 
     //Set value
     if (code.includes('=')) {
