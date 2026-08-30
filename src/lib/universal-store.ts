@@ -93,7 +93,12 @@ export class UniversalStore {
     }
 
     static isNumber(str: string):boolean {
-        if (typeof str !== 'string' || str.trim() === '') return false;
+        for (let i = 0; i < str.length; i++) {
+            if (!"1234567890-.".includes(str[i])) {
+                return false;
+            }
+        }
+        if (typeof str !== 'string' || str.trim() === '' || str.includes('+')) return false;
         return !isNaN(Number(str));
     }
 }
