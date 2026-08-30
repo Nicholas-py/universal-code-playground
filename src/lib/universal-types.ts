@@ -125,6 +125,9 @@ export class ULiszt extends UniversalObj {
         })
         return toreturn;
     }
+    public static from(lst:UniversalObj[]):ULiszt {
+        return new ULiszt(ULiszt.empty.hashval(lst));
+    }
 }
 
 export class UFunctionBuiltin extends UniversalObj {
