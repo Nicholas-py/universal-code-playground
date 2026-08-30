@@ -86,7 +86,7 @@ export class UniversalBuiltins {
                 return arg[0]
             }
             if (arg[0] instanceof UNumber) {
-                return new UNumber((arg[0].value - arg1length).toString())
+                return new UNumber((arg[0].value - arg1length).toString(), interpreter)
             }
 
             if (arg[0] instanceof ULiszt && arg[1] instanceof ULiszt) {
@@ -331,9 +331,10 @@ export class UniversalBuiltins {
         if (arg != undefined) {
             func.setargname(arg.tostring())
         }
-        console.log("function created!")
         return func
     }
+
+
     public static for(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
         if (arg == undefined) {
             return new UFunctionBuiltin("for", interpreter);
@@ -382,6 +383,157 @@ export class UniversalBuiltins {
         }
 
         return new ULiszt(ULiszt.empty.hashval(oplist), interpreter)
+    }
+
+    public static lt(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("<", interpreter);
+        }
+        else if (arg instanceof UniversalObj) {
+            let hash = UFunctionLambda.empty.hashval({ func: '<', val: arg })
+            return new UFunctionLambda(hash, interpreter)
+        }
+        else {
+            if (arg.length != 2) {
+                throw new Error("Must be two arguments to binary operator")
+            }
+
+            let arg1length = 0
+            if (arg[1] instanceof ULiszt || arg[1] instanceof UString) {
+                arg1length = arg[1].value.length
+            }
+            else if (arg[1] instanceof UNumber) {
+                arg1length = arg[1].value
+            }
+            else {
+                throw new UniversalError("can't do that")
+            }
+            let arg0length = 0
+            if (arg[0] instanceof ULiszt || arg[0] instanceof UString) {
+                arg1length = arg[0].value.length
+            }
+            else if (arg[0] instanceof UNumber) {
+                arg1length = arg[0].value
+            }
+            else {
+                throw new UniversalError("can't do that")
+            }
+
+            if (arg0length < arg1length) {
+                return new UNumber("1");
+            }
+            else {
+                return new UNumber("0");
+            }
+        }
+    }
+    public static gt(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin(">", interpreter);
+        }
+        else if (arg instanceof UniversalObj) {
+            let hash = UFunctionLambda.empty.hashval({ func: '>', val: arg })
+            return new UFunctionLambda(hash, interpreter)
+        }
+        else {
+            if (arg.length != 2) {
+                throw new Error("Must be two arguments to binary operator")
+            }
+
+            let arg1length = 0
+            if (arg[1] instanceof ULiszt || arg[1] instanceof UString) {
+                arg1length = arg[1].value.length
+            }
+            else if (arg[1] instanceof UNumber) {
+                arg1length = arg[1].value
+            }
+            else {
+                throw new UniversalError("can't do that")
+            }
+            let arg0length = 0
+            if (arg[0] instanceof ULiszt || arg[0] instanceof UString) {
+                arg1length = arg[0].value.length
+            }
+            else if (arg[0] instanceof UNumber) {
+                arg1length = arg[0].value
+            }
+            else {
+                throw new UniversalError("can't do that")
+            }
+
+            if (arg0length > arg1length) {
+                return new UNumber("1");
+            }
+            else {
+                return new UNumber("0");
+            }
+        }
+    }
+
+    public static lower(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg instanceof UString) {
+            return new UString(arg.value.toLowerCase(), interpreter)
+        }
+        if (arg instanceof ULiszt) {
+            return new ULiszt(ULiszt.empty.hashval(arg.value.map((val) => { return UniversalBuiltins.lower(val, interpreter, indentedlines) })))
+        }
+        else {
+            return arg;
+        }
+    }
+    public static upper(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg instanceof UString) {
+            return new UString(arg.value.toUpperCase(), interpreter)
+        }
+        if (arg instanceof ULiszt) {
+            return new ULiszt(ULiszt.empty.hashval(arg.value.map((val) => { return UniversalBuiltins.upper(val, interpreter, indentedlines) })))
+        }
+        else {
+            return arg;
+        }
+    }
+
+    public static sliceleft(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("sliceleft", interpreter);
+        }
+        else if (arg instanceof UniversalObj) {
+            let hash = UFunctionLambda.empty.hashval({ func: 'sliceleft', val: arg })
+            return new UFunctionLambda(hash, interpreter)
+        }
+        else {
+            if (!((arg[0] instanceof ULiszt || arg[0] instanceof UString) && arg[1] instanceof UNumber)) {
+                throw new UniversalError("slice only works on lists with numbers")
+            }
+            if (arg[0] instanceof ULiszt) {
+                return ULiszt.from(arg[0].value.slice(0, arg[1].value))
+            }
+            else if (arg[0] instanceof UString) {
+                return new UString(arg[0].value.slice(0, arg[1].value))
+            }
+            return new UString("")
+        }
+    }
+    public static sliceright(arg: UniversalObj | UniversalObj[], interpreter: Interpreter, indentedlines: string): UniversalObj {
+        if (arg == undefined) {
+            return new UFunctionBuiltin("sliceright", interpreter);
+        }
+        else if (arg instanceof UniversalObj) {
+            let hash = UFunctionLambda.empty.hashval({ func: 'sliceright', val: arg })
+            return new UFunctionLambda(hash, interpreter)
+        }
+        else {
+            if (!((arg[0] instanceof ULiszt || arg[0] instanceof UString) && arg[1] instanceof UNumber)) {
+                throw new UniversalError("slice only works on lists with numbers")
+            }
+            if (arg[0] instanceof ULiszt) {
+                return ULiszt.from(arg[0].value.slice(arg[1].value))
+            }
+            else if (arg[0] instanceof UString) {
+                return new UString(arg[0].value.slice(arg[1].value))
+            }
+            return new UString("")
+        }
     }
 
 }

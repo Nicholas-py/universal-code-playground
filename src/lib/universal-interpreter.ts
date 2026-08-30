@@ -16,13 +16,42 @@ const storedefaults = {
   "true": "num:1",
   "false": "num:0",
   "()": "str:",
-  "space":"str: ",
+  "space": "str: ",
+
+  "q": "str:q",
+  "w": "str:w",
+  "e": "str:e",
+  "r": "str:r",
+  "t": "str:t",
+  "y": "str:y",
+  "u": "str:u",
+  "i": "str:i",
+  "o": "str:o",
+  "p": "str:p",
+  "a": "str:a",
+  "s": "str:s",
+  "d": "str:d",
+  "f": "str:f",
+  "g": "str:g",
+  "h": "str:h",
+  "j": "str:j",
+  "k": "str:k",
+  "l": "str:l",
+  "z": "str:z",
+  "x": "str:x",
+  "c": "str:c",
+  "v": "str:v",
+  "b": "str:b",
+  "n": "str:n",
+  "m": "str:m",
 
   "print": "fub:=print",
   "+": "fub:=+",
   "-": "fub:=-",
   "*": "fub:=*",
   "/": "fub:=/",
+  "<": "fub:=<",
+  ">": "fub:=>",
   "get": "fub:=get",
   "type": "fub:=type",
   "equals": "fub:=equals",
@@ -32,7 +61,12 @@ const storedefaults = {
   "for": "fub:=for",
   "while": "fub:=while",
   "function": "fub:=function",
-  "range":'fub:=range'
+  "range": 'fub:=range',
+  "upper": 'fub:=upper',
+  "lower": 'fub:=lower',
+  "sliceleft":'fub:=sliceleft',
+  "sliceright":'fub:=sliceright',
+  
 }
 
 
@@ -54,7 +88,13 @@ export class Interpreter {
     "function": UniversalBuiltins.function,
     "while": UniversalBuiltins.while,
     "for": UniversalBuiltins.for,
-    "range": UniversalBuiltins.range
+    "range": UniversalBuiltins.range,
+    "<":UniversalBuiltins.lt,
+    ">":UniversalBuiltins.gt,
+    "lower":UniversalBuiltins.lower,
+    "upper":UniversalBuiltins.upper,
+    "sliceleft":UniversalBuiltins.sliceleft,
+    "sliceright":UniversalBuiltins.sliceright
 
   }
 
@@ -66,7 +106,7 @@ export class Interpreter {
     "fub": UFunctionBuiltin,
     "lzt": ULiszt,
     "ful": UFunctionLambda,
-    "fun": UFunction 
+    "fun": UFunction
   } as const
 
   logging = true;
@@ -80,7 +120,7 @@ export class Interpreter {
     })
     if (this.logging) { console.log('\n~~~ Run begins ~~~') }
 
-    this.interpret('\n'+this.source, "");
+    this.interpret('\n' + this.source, "");
 
   }
 
@@ -91,7 +131,7 @@ export class Interpreter {
     if (lines.length > 1) {
       let lastval: UniversalObj = new UString("", this);
 
-      let actionlines: { line: string, indents: string[] }[] = [{line:"", indents:[]}]
+      let actionlines: { line: string, indents: string[] }[] = [{ line: "", indents: [] }]
       let indentamount = 0
       lines.forEach((line) => {
         if (line.trim().length == 0) { return; }
@@ -106,7 +146,6 @@ export class Interpreter {
           }
           actionlines[actionlines.length - 1].indents.push(this.removeindent(line, indentamount))
         }
-        console.log(actionlines)
       });
 
       actionlines.forEach((data) => {
@@ -121,7 +160,7 @@ export class Interpreter {
       return new UString("", this)
     }
 
-    
+
 
     //Set value
     if (code.includes('=')) {
@@ -180,9 +219,8 @@ export class Interpreter {
 
   setvariable(key: string, obj: UniversalObj) {
     let valhash = obj.type + ':' + obj.hash();
-    console.log(obj.type, obj.hash())
     this.store.setValue(key, valhash);
-    console.log('saving',key, valhash, this.store.getValue('true'))
+    console.log('saving', valhash, 'to', key)
 
   }
 
