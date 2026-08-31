@@ -7,11 +7,12 @@ export type UniArg = UniversalObj | undefined
 
 
 
-///DO NOT store any data outside of value, it will not save
+///DO NOT store any data outside of UniversalObj.value, it will not save
 export abstract class UniversalObj {
     public readonly type: string = "bae"
     public value: any
-
+    
+    //interpreter only required for UFunctionBuiltin and UFunction
     constructor(inp: string, protected interpreter?: Interpreter) {
         this.value = this.parse(inp);
     }

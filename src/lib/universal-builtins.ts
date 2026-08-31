@@ -42,10 +42,11 @@ export class UniversalBuiltins {
                 return new ULiszt(ULiszt.empty.hashval(arg[0].value.concat(arg[1].value)), interpreter)
             }
             if (arg[0] instanceof ULiszt) {
-                return new ULiszt(ULiszt.empty.hashval(arg[0].value.concat([arg[1].value])))
+                return ULiszt.from(arg[0].value.concat([arg[1]]))
             }
             if (arg[1] instanceof ULiszt) {
-                return new ULiszt(ULiszt.empty.hashval([arg[0].value].concat(arg[1].value)))
+                console.log([arg[0]].concat(arg[1].value))
+                return ULiszt.from([arg[0]].concat(arg[1].value))
             }
 
             return new UString(arg[0].tostring() + arg[1].tostring(), interpreter)
@@ -208,11 +209,18 @@ export class UniversalBuiltins {
             if (arg.length != 2) {
                 throw new Error("Must be two arguments to infix function")
             }
-            if (arg[0] instanceof ULiszt && arg[1] instanceof UNumber) {
-                return arg[0].value[Math.floor(arg[1].value)]
+            if (!(arg[1] instanceof UNumber)) {
+                throw new UniversalError("Must be number to get")
             }
-            if (arg[0] instanceof UString && arg[1] instanceof UNumber) {
-                return new UString(arg[0].value[Math.floor(arg[1].value)], interpreter)
+            let val = arg[0].value[Math.floor(arg[1].value)]
+            if (val === undefined) {
+                throw new UniversalError("Undefined")
+            }
+            if (arg[0] instanceof ULiszt) {
+                return val
+            }
+            if (arg[0] instanceof UString) {
+                return new UString(val)
             }
 
             throw new UniversalError("Cannot get value of non-sequence")
