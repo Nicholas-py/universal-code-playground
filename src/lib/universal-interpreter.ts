@@ -17,6 +17,8 @@ const storedefaults = {
   "false": "num:0",
   "()": "str:",
   "space": "str: ",
+  "enter": `str:\n`,
+  "tab": 'str:\t',
 
   "q": "str:q",
   "w": "str:w",
@@ -46,6 +48,10 @@ const storedefaults = {
   "m": "str:m",
 
   "print": "fub:=print",
+  "type": "fub:=type",
+  "upper": 'fub:=upper',
+  "lower": 'fub:=lower',
+  "len": "fub:=len",
   "+": "fub:=+",
   "-": "fub:=-",
   "*": "fub:=*",
@@ -53,20 +59,17 @@ const storedefaults = {
   "<": "fub:=<",
   ">": "fub:=>",
   "get": "fub:=get",
-  "type": "fub:=type",
+  "sliceleft": 'fub:=sliceleft',
+  "sliceright": 'fub:=sliceright',
   "equals": "fub:=equals",
-  "not": "fub:=not",
-  "len": "fub:=len",
   "if": "fub:=if",
   "for": "fub:=for",
   "while": "fub:=while",
   "function": "fub:=function",
   "range": 'fub:=range',
-  "upper": 'fub:=upper',
-  "lower": 'fub:=lower',
-  "sliceleft":'fub:=sliceleft',
-  "sliceright":'fub:=sliceright',
-  
+  "str": 'fub:=str',
+  "not": "fub:=not",
+
 }
 
 
@@ -89,12 +92,13 @@ export class Interpreter {
     "while": UniversalBuiltins.while,
     "for": UniversalBuiltins.for,
     "range": UniversalBuiltins.range,
-    "<":UniversalBuiltins.lt,
-    ">":UniversalBuiltins.gt,
-    "lower":UniversalBuiltins.lower,
-    "upper":UniversalBuiltins.upper,
-    "sliceleft":UniversalBuiltins.sliceleft,
-    "sliceright":UniversalBuiltins.sliceright
+    "<": UniversalBuiltins.lt,
+    ">": UniversalBuiltins.gt,
+    "lower": UniversalBuiltins.lower,
+    "upper": UniversalBuiltins.upper,
+    "sliceleft": UniversalBuiltins.sliceleft,
+    "sliceright": UniversalBuiltins.sliceright,
+    "str": UniversalBuiltins.str,
 
   }
 

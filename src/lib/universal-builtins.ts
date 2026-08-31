@@ -90,7 +90,7 @@ export class UniversalBuiltins {
                 return new UNumber((arg[0].value - arg1length).toString(), interpreter)
             }
 
-            if (arg[0] instanceof ULiszt && arg[1] instanceof ULiszt) {
+            if (arg[0] instanceof ULiszt) {
                 return new ULiszt(ULiszt.empty.hashval(arg[0].value.slice(0, -Math.ceil(arg1length))), interpreter)
             }
 
@@ -252,9 +252,10 @@ export class UniversalBuiltins {
     }
 
     private static areequal(a: UniversalObj, b: UniversalObj): boolean {
-        if ((a instanceof UNumber || a instanceof UString) && (b instanceof UNumber || b instanceof UString)) {
-            return a.tostring() == b.tostring()
+        if ((a instanceof UNumber) && (b instanceof UNumber )) {
+            return a.value == b.value
         }
+
         if (a instanceof ULiszt) {
             if (!(b instanceof ULiszt)) {
                 return false;
@@ -301,6 +302,9 @@ export class UniversalBuiltins {
         }
         if (arg instanceof UString || arg instanceof ULiszt) {
             return new UNumber(arg.value.length.toString(), interpreter)
+        }
+        if (arg instanceof UNumber) {
+            return new UNumber(Math.log10(Math.abs(arg.value)).toString())
         }
         return new UNumber(arg.tostring().length.toString())
     }
@@ -543,5 +547,7 @@ export class UniversalBuiltins {
             return new UString("")
         }
     }
-
+    public static str(arg: UniversalObj, interpreter: Interpreter, indentedlines: string): UniversalObj {
+        return  new UString(arg.tostring())
+    }
 }
