@@ -54,7 +54,6 @@ function Home() {
       Object.keys(res.full).forEach((key) => {
         localrecord.set(key, res.full[key])
       })
-      console.log(localrecord)
       setLocalVariables(localrecord);
     } catch (e) {
 

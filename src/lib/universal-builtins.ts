@@ -422,15 +422,15 @@ export class UniversalBuiltins {
             }
             let arg0length = 0
             if (arg[0] instanceof ULiszt || arg[0] instanceof UString) {
-                arg1length = arg[0].value.length
+                arg0length = arg[0].value.length
             }
             else if (arg[0] instanceof UNumber) {
-                arg1length = arg[0].value
+                arg0length = arg[0].value
             }
             else {
                 throw new UniversalError("can't do that")
             }
-
+            console.log("length compare:",arg0length, arg1length)
             if (arg0length < arg1length) {
                 return new UNumber("1");
             }

@@ -333,22 +333,84 @@ function RouteComponent() {
                         integer. It will return the element of the list or character of the string in that position.</p>
                     <Builtin>sliceleft, sliceright</Builtin>
                     <p>Similarly to <ILCode>get</ILCode>, <ILCode>sliceleft</ILCode> and <ILCode>sliceright</ILCode> are implemented as binary operators.
-                    Sliceleft takes a string/list and integer (call it n) and returns the first n values of the string/list. Sliceright does the same, but reversed;
-                    you instead get the last n values. They will have the same type as the original argument, and the values will be unchanged.
+                        Sliceleft takes a string/list and integer (call it n) and returns the first n values of the string/list. Sliceright does the same, but reversed;
+                        you instead get the last n values. They will have the same type as the original argument, and the values will be unchanged.
                     </p>
 
                     <SubSection>Control Flow</SubSection>
+                    <Builtin>if</Builtin>
+                    <p>The <ILCode>if</ILCode> statement branches a program. <ILCode>if</ILCode> takes one argument. If the argument is truthy (not
+                        <ILCode>0</ILCode>, the empty string, or an empty list), it will execute any indented code. Indented code is executed in the
+                        global namespace, as all code is; it works identically to normal code. Note that any indent value works, as long as it's consistent.
+                        Inconsistent indentation will cause an error.
+                    </p>
+                    <Code>
+                        if 2 equals 1 + 1<br />
+                        <Ind />print 2 is 1 plus 1<br />
+                        if 5 equals 2 + 2<br />
+                        <Ind />print 5 is 2 plus 2<OPL />
+                        OUTPUT: 2 is 1 plus 1
+                    </Code>
+                    <Builtin>for</Builtin>
+                    <p>Use the <ILCode>for</ILCode> command to generate loops. The argument to for must be a list of length 2 or greater. The first
+                        element of the list will be converted to a variable name and used as the index variable. For each other value in the list,
+                        it will be set to that value and then the indented code will be executed. For most usage, none of that is important. Simply
+                        use the following syntax (assuming i has not been overwritten).
+                    </p>
+                    <Code>for i range 5<br />
+                        <Ind /> print i<OPL />
+                        OUTPUT: 0 <br />
+                        OUTPUT: 1 <br />
+                        OUTPUT: 2 <br />
+                        OUTPUT: 3 <br />
+                        OUTPUT: 4 <br />
+                    </Code>
+                    <Builtin>function</Builtin>
+                    <p> The <ILCode>function</ILCode> statement creates a function. It takes one argument, which will be coerced to a string:
+                        the argument the function takes in. (For two+ argument functions, pass in lists as arguments) Then, it creates a function
+                        with the indented lines. Save this function to a variable to use it. Note that all terms are global.
+                    </p>
+                    <Code>
+                        hiname = function name<br />
+                        <Ind />print hi name<br />
+                        hiname johnson
+                        <OPL />
+                        OUTPUT: hi johnson
+                    </Code>
+
+
+                    <Builtin>while</Builtin>
+                    The <ILCode>while</ILCode> builtin runs while loops. It takes in a function - note that a statement will not work. It will then
+                    call that function with no arguments, and until the function returns false, will execute the indented lines. There is a maximum
+                    number of executions to prevent infinite loops.
+                    <Code>
+                        counter = 0<br />
+                        not6 = function ()<br />
+                        <Ind />counter &lt; 6<br />
+                        while not6<br />
+                        <Ind />print counter<br/>
+                        <Ind/> counter = counter + 1
+                        <OPL />
+                        OUTPUT: 0 <br />
+                        OUTPUT: 1 <br />
+                        OUTPUT: 2 <br />
+                        OUTPUT: 3 <br />
+                        OUTPUT: 4 <br />
+                        OUTPUT: 5 <br />
+
+
+                    </Code>
 
                     <SubSection>Miscellany</SubSection>
                     <Builtin>range</Builtin>
-                    <p>The <ILCode>range</ILCode> builtin provides a way of creating a list that "counts up" to a value. When passed a number, it creates a list 
-                    [0,1,2,3,4, ...], up to but not including the number passed. For a string/list, it does the same thing with subsequences: range kitty will return 
-                    ["k","ki","kit","kitt","kitty"]. Note that in this case, the initial length is 1 and it includes the full string. You can, of course, define your own
-                    function with different rules. 
+                    <p>The <ILCode>range</ILCode> builtin provides a way of creating a list that "counts up" to a value. When passed a number, it creates a list
+                        [0,1,2,3,4, ...], up to but not including the number passed. For a string/list, it does the same thing with subsequences: range kitty will return
+                        ["k","ki","kit","kitt","kitty"]. Note that in this case, the initial length is 1 and it includes the full string. You can, of course, define your own
+                        function with different rules.
                     </p>
                     <Builtin>str</Builtin>
                     <p>If you need to convert a value to a string explicitly, the <ILCode>str</ILCode> builtin has you covered. It doesn't do anything else
-                    though.</p>
+                        though.</p>
                 </section>
 
             </div>
