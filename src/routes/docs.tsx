@@ -163,7 +163,7 @@ function RouteComponent() {
                     </Code>
                     <SubSection>Numbers and Strings</SubSection>
                     <p> The most important types are numbers and strings. In many ways, they work similarily. Both can be created as the default value of variable names:
-                        
+
                     </p>
                     <Code>
                         num1 = 123<br />
@@ -173,8 +173,8 @@ function RouteComponent() {
                         reconstructed from single letter strings.
                     </p>
                     <Code>13 = 187263871 - 187263858<br></br>
-                    chat = c12 + h12 + a12 + t12
-                    <Ind/>Use the numbers after variable names for security.
+                        chat = c12 + h12 + a12 + t12
+                        <Ind />Use the numbers after variable names for security.
                     </Code>
                     <p>
                         Numbers are stored as floating points, inherited from Javascript. 0.5, -66, and -129873.17264 are all examples of numbers. However,
@@ -186,8 +186,8 @@ function RouteComponent() {
                         print 123 + 456<br />
                         print hii + bii<br />
                         print 123 - 456<br />
-                        print hii equals hii<br/>
-                        <Ind/>will output 1, which is the boolean true value
+                        print hii equals hii<br />
+                        <Ind />will output 1, which is the boolean true value
                         <OPL />
                         OUTPUT: 579<br />
                         OUTPUT: hiibii<br />
@@ -196,19 +196,72 @@ function RouteComponent() {
                     </Code>
                     <p> Both strings and numbers simply display themselves when printed.</p>
                     <SubSection>Lists</SubSection>
-                        <p>Lists are the only way to store sequential data in <Universal/>. They can store any type of data at any length. To create one,
+                    <p>Lists are the only way to store sequential data in <Universal />. They can store any type of data at any length. To create one,
                         simply separate two numbers or strings with spaces. </p>
-                        <Code>
-                            <Ind/> mylst will equal [1, 2, hello]<br/>
-                            mylst = 1 2 hello
-                        </Code>
-
+                    <Code>
+                        <Ind /> mylst will equal [1, 2, "hello"]<br />
+                        mylst = 1 2 hello
+                    </Code>
+                    <p>Lists can execute on any value other than lambda functions. Doing so will return a new list with the value inserted into the start.
+                        During the execution of <InlineCode>1 2 hello</InlineCode>, <InlineCode>2 hello</InlineCode>
+                        is made into a list, which then executes on <InlineCode>1</InlineCode>. <InlineCode>1</InlineCode> is inserted into the start to assemble
+                        the final list.</p><p>
+                        To get a given element of a list, use the <InlineCode>get</InlineCode> operator, like so (lists are zero-indexed):</p>
+                    <Code>
+                        print mylst get 2
+                        <OPL />
+                        OUTPUT: hello
+                    </Code>
+                    <p>Setting values is slightly harder - without square brackets, there isn't a natural syntax.  You can do it using the slice
+                        operators, as shown below.</p>
+                    <Code>
+                        <Ind />Set the nth value of mylst to "pizza"<br />
+                        mylst1 = mylst sliceleft n <br />
+                        mylst2 = mylst sliceright n + 1<br />
+                        mylst = mylst1 + pizza mylst2<br />
+                    </Code>
+                    <p>
+                        Depending on usecase, this can be made into a function.
+                    </p>
+                    <p>When printing a list, it will print each element separated by spaces.</p>
                     <SubSection>Functions</SubSection>
+                    <p>There are three types of function datatypes.</p>
+                    <Code>
+                        functionbuiltin = print<br />
+                        functionlambda = + 2<br />
+                        functionuser = function ()<br />
+                        <Ind /> print hello world
+                    </Code>
+                    <p>A builtin function is an object that stores a function tied to a behind-the-scenes method. Examples of this are
+                        <InlineCode>print</InlineCode>, <InlineCode>+</InlineCode>, or <InlineCode>len</InlineCode>. They can be stored
+                        to other variables for aliases, or added to lists. When executed, they call the behind-the-scenes method to provide
+                        functionality that can't be implemented with objects alone.
+                    </p>
+                    <p>A lambda function is a trick to make infix operators work. It takes the form of &lt;operator&gt; &lt;value&gt;. It can
+                        execute on any type, and will apply the operator with the value it's executing on and &lt;value&gt;. For example,
+                        using functionlambda from earlier:
+                    </p>
+                    <Code>print functionlambda 2<br />
+                        print 2 functionlambda<OPL />
+                        OUTPUT: 4<br />
+                        OUTPUT: 4
+                    </Code>
+                    <p>
+                        User-defined functions work very similarily to builtin functions, except that they store a few lines of 
+                        <Universal/> code instead of a behind-the-scenes method, as well as an argument name. When executed, they set the argument
+                        name to any provided argument then execute the code.
+                    </p>
+                    <Code>
+                        functionuser ()
+                        <OPL/>
+                        OUTPUT: Hello World!
+                    </Code>
                 </section>
 
                 <section className='mt-10'>
                     <SectionTitle> Builtins</SectionTitle>
                     <SubSection>Operators</SubSection>
+                    
                     <SubSection>Control Flow</SubSection>
                     <SubSection>Miscellany</SubSection>
                 </section>
