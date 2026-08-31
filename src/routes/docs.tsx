@@ -7,13 +7,16 @@ export const Route = createFileRoute('/docs')({
 })
 
 function SectionTitle({ children }: { children: ReactNode }) {
-    return <div><h2 className="inline-block border-b-2 border-border mb-4 leading-[1.05] tracking-tight text-foreground md:text-3xl text-primary bold">{children}&nbsp; </h2></div>
+    let id = children?.toString().toLowerCase().trim().replaceAll(' ','-')
+    return <div><h2 id={id} className="inline-block border-b-2 border-border mb-4 leading-[1.05] tracking-tight text-foreground md:text-3xl text-primary bold"><a href={'#'+id}>{children}&nbsp;</a> </h2></div>
 }
 
 function SubSection({ children }: { children: ReactNode }) {
-    return <div><Ind /><h3 className="inline-block border-border mb-4 leading-[1.05] mt-4 tracking-tight text-foreground md:text-2xl text-primary">{children}&nbsp; </h3></div>
+    let id = children?.toString().toLowerCase().trim().replaceAll(' ','-')
+    return <div><Ind /><h3 id={id} className="inline-block border-border mb-4 leading-[1.05] mt-4 tracking-tight text-foreground md:text-2xl text-primary"><a href={'#'+id}>{children}&nbsp; </a></h3></div>
 }
 function Builtin({ children }: { children: ReactNode }) {
+    let id = children?.toString().toLowerCase().trim().replaceAll(' ','-')
     return <div><Ind /><Ind /><h4 className="inline-block italic border-b-2 border-border mb-4 mt-1 leading-[1.05]  tracking-tight text-foreground md:text-xl text-primary">{children} </h4></div>
 }
 
