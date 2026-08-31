@@ -340,6 +340,15 @@ function RouteComponent() {
                     <SubSection>Control Flow</SubSection>
 
                     <SubSection>Miscellany</SubSection>
+                    <Builtin>range</Builtin>
+                    <p>The <ILCode>range</ILCode> builtin provides a way of creating a list that "counts up" to a value. When passed a number, it creates a list 
+                    [0,1,2,3,4, ...], up to but not including the number passed. For a string/list, it does the same thing with subsequences: range kitty will return 
+                    ["k","ki","kit","kitt","kitty"]. Note that in this case, the initial length is 1 and it includes the full string. You can, of course, define your own
+                    function with different rules. 
+                    </p>
+                    <Builtin>str</Builtin>
+                    <p>If you need to convert a value to a string explicitly, the <ILCode>str</ILCode> builtin has you covered. It doesn't do anything else
+                    though.</p>
                 </section>
 
             </div>
