@@ -22,9 +22,11 @@ export default defineConfig({
   //For some reason, doesn't load CSS without this. Is not actually an error (I think)
   nitro: {
     baseURL: "/universal",
-    output: {
-      publicDir: "client",
+    preset: "cloudflare-module",
+    cloudflare: {
+      deployConfig: false,
     },
+
 
   },
 
