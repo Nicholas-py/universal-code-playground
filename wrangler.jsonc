@@ -21,7 +21,8 @@
   },
   "services": [
   { "binding": "UNIVERSAL_STORE", "service": "universal-store" }
-]
+],
+"assets": {"directory": "dist/client/"}
   
   
 }
