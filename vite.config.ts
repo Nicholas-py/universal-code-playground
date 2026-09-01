@@ -14,13 +14,19 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  
+
   vite: {
     base: "/universal/"
   },
 
   //For some reason, doesn't load CSS without this. Is not actually an error (I think)
-  nitro: { baseURL: "/universal" },
+  nitro: {
+    baseURL: "/universal",
+    output: {
+      publicDir: "client",
+    },
+
+  },
 
   plugins: [cloudflare({
     viteEnvironment: {
