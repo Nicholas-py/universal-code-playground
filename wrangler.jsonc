@@ -24,8 +24,4 @@
       "service": "universal-store"
     }
   ],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": "dist/client/"
-  }
 }
