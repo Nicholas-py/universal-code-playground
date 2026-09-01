@@ -26,9 +26,10 @@ export default defineConfig({
     cloudflare: {
       deployConfig: false,
     },
-
-
   },
+  build: {
+  outDir:  "/universal/assets/"
+},
 
   plugins: [cloudflare({
     viteEnvironment: {
