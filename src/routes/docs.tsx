@@ -7,16 +7,16 @@ export const Route = createFileRoute('/docs')({
 })
 
 function SectionTitle({ children }: { children: ReactNode }) {
-    let id = children?.toString().toLowerCase().trim().replaceAll(' ','-')
-    return <div><h2 id={id} className="inline-block border-b-2 border-border mb-4 leading-[1.05] tracking-tight text-foreground md:text-3xl text-primary bold"><a href={'#'+id}>{children}&nbsp;</a> </h2></div>
+    let id = children?.toString().toLowerCase().trim().replaceAll(' ', '-')
+    return <div><h2 id={id} className="inline-block border-b-2 border-border mb-4 leading-[1.05] tracking-tight text-foreground md:text-3xl text-primary bold"><a href={'#' + id}>{children}&nbsp;</a> </h2></div>
 }
 
 function SubSection({ children }: { children: ReactNode }) {
-    let id = children?.toString().toLowerCase().trim().replaceAll(' ','-')
-    return <div><Ind /><h3 id={id} className="inline-block border-border mb-4 leading-[1.05] mt-4 tracking-tight text-foreground md:text-2xl text-primary"><a href={'#'+id}>{children}&nbsp; </a></h3></div>
+    let id = children?.toString().toLowerCase().trim().replaceAll(' ', '-')
+    return <div><Ind /><h3 id={id} className="inline-block border-border mb-4 leading-[1.05] mt-4 tracking-tight text-foreground md:text-2xl text-primary"><a href={'#' + id}>{children}&nbsp; </a></h3></div>
 }
 function Builtin({ children }: { children: ReactNode }) {
-    let id = children?.toString().toLowerCase().trim().replaceAll(' ','-')
+    let id = children?.toString().toLowerCase().trim().replaceAll(' ', '-')
     return <div><Ind /><Ind /><h4 className="inline-block italic border-b-2 border-border mb-4 mt-1 leading-[1.05]  tracking-tight text-foreground md:text-xl text-primary">{children} </h4></div>
 }
 
@@ -103,7 +103,7 @@ function RouteComponent() {
                     <ol className='ml-4'>
                         <li className='mt-2 ml-5 -indent-4'><span className='text-primary'>1. </span><span className=''> Look up <ILCode>world</ILCode> in the store. This should return a string with value "World!" </span></li>
                         <li className='mt-1 ml-6 -indent-5'><span className='text-primary'>2. </span> Look up <ILCode>hello</ILCode> similarly, receiving "Hello".</li>
-                        <li className='mt-1 ml-6 -indent-5'><span className='text-primary'>3. </span> Attempt to execute "Hello"("World!") and "World!"("Hello"). Since they're both strings, both fail.</li>
+                        <li className='mt-1 ml-6 -indent-5'><span className='text-primary'>3. </span> Attempt to execute "Hello"("World!") and "World!"("Hello"). Since they're both strings, both attempts fail.</li>
                         <li className='mt-1 ml-6 -indent-5'><span className='text-primary'>4. </span> Create a list ["Hello", "World!"].</li>
                         <li className='mt-1 ml-6 -indent-5'><span className='text-primary'>5. </span> Look up <ILCode>print</ILCode> in the store, receiving a function.</li>
                         <li className='mt-1 ml-5 -indent-4 mb-3'><span className='text-primary'>6. </span> Execute print(["Hello", "World!"]). Printing a list prints it space-separated, outputting <ILCode>Hello World!</ILCode></li>
@@ -170,7 +170,7 @@ function RouteComponent() {
                         OUTPUT: 10<br />
                     </Code>
                     <SubSection>Numbers and Strings</SubSection>
-                    <p> The most important types are numbers and strings. In many ways, they work similarily. Both can be created as the default value of variable names:
+                    <p> The most important types are numbers and strings. In many ways, they work similarly. Both can be created as the default value of variable names:
 
                     </p>
                     <Code>
@@ -229,7 +229,7 @@ function RouteComponent() {
                         mylst = mylst1 + pizza mylst2<br />
                     </Code>
                     <p>
-                        Depending on usecase, this can be made into a function.
+                        Depending on use case, this can be made into a function.
                     </p>
                     <p>When printing a list, it will print each element separated by spaces.</p>
                     <SubSection>Functions</SubSection>
@@ -255,8 +255,8 @@ function RouteComponent() {
                         OUTPUT: 4
                     </Code>
                     <p>
-                        User-defined functions work very similarily to builtin functions, except that they store a few lines of
-                        <Universal /> code instead of a behind-the-scenes method, as well as an argument name. When executed, they set the argument
+                        User-defined functions work very similarly to builtin functions, except that they store a few lines of &nbsp;<Universal />
+                        code instead of a behind-the-scenes method, as well as an argument name. When executed, they set the argument
                         name to any provided argument then execute the code.
                     </p>
                     <Code>
@@ -292,7 +292,7 @@ function RouteComponent() {
                     <p> The <ILCode>type</ILCode> builtin will output a string containing the type of its argument: <ILCode>num</ILCode> for number,
                         <ILCode>str</ILCode> for string,
                         <ILCode>lzt</ILCode> for liszt,
-                        <ILCode>fun</ILCode> for user funtion,
+                        <ILCode>fun</ILCode> for user function,
                         <ILCode>fub</ILCode> for builtin function, or
                         <ILCode>ful</ILCode> for lambda function.
 
@@ -328,11 +328,11 @@ function RouteComponent() {
                     </p>
                     <Builtin>&lt;, &gt;</Builtin>
                     <p> The &lt; and &gt; operators work on numbers, strings, and lists - for numbers they compare the value of the numbers, and for
-                        strings and lists the lengths. They return 1 and 0 just like equals. For &lt;=, use the <ILCode>not</ILCode> funtion with &gt;, and vice
+                        strings and lists the lengths. They return 1 and 0 just like equals. For &lt;=, use the <ILCode>not</ILCode> function with &gt;, and vice
                         versa.
                     </p>
                     <Builtin>get</Builtin>
-                    <p>The <ILCode>get</ILCode> command for lists actually works as an binary operator. The left argument must be a list or string, and the right a positive
+                    <p>The <ILCode>get</ILCode> command for lists actually works as a binary operator. The left argument must be a list or string, and the right a positive
                         integer. It will return the element of the list or character of the string in that position.</p>
                     <Builtin>sliceleft, sliceright</Builtin>
                     <p>Similarly to <ILCode>get</ILCode>, <ILCode>sliceleft</ILCode> and <ILCode>sliceright</ILCode> are implemented as binary operators.
@@ -373,12 +373,22 @@ function RouteComponent() {
                         the argument the function takes in. (For two+ argument functions, pass in lists as arguments) Then, it creates a function
                         with the indented lines. Save this function to a variable to use it. Note that all terms are global.
                     </p>
+                    <p>The return value of a function is the return value of its final line. To return from inside if statements, set return variable
+                        and then set the final line of the function to the return variable.
+                    </p>
                     <Code>
                         hiname = function name<br />
-                        <Ind />print hi name<br />
-                        hiname johnson
+                        <Ind />returnvalue = name<br />
+                        <Ind />if name equals apple<br />
+                        <Ind /><Ind />returnvalue = That's not a name!<br />
+                        <Ind />print hi name <br />
+                       <Ind/>returnvalue<br /><br />
+                        hiname johnson<br />
+                        print hiname apple
                         <OPL />
-                        OUTPUT: hi johnson
+                        OUTPUT: hi johnson<br />
+                        OUTPUT: hi apple<br />
+                        OUTPUT: That's not a name!
                     </Code>
 
 
@@ -391,8 +401,8 @@ function RouteComponent() {
                         not6 = function ()<br />
                         <Ind />counter &lt; 6<br />
                         while not6<br />
-                        <Ind />print counter<br/>
-                        <Ind/> counter = counter + 1
+                        <Ind />print counter<br />
+                        <Ind /> counter = counter + 1
                         <OPL />
                         OUTPUT: 0 <br />
                         OUTPUT: 1 <br />
@@ -415,8 +425,8 @@ function RouteComponent() {
                     <p>If you need to convert a value to a string explicitly, the <ILCode>str</ILCode> builtin has you covered. It doesn't do anything else
                         though.</p>
                 </section>
-
             </div>
+            <p style={{ marginLeft: '0px' }}>Any questions about the language or suggestions for improvement? Email me at <Link href='mailto:nicholas@waslander.ca'>nicholas@waslander.ca</Link>.</p>
 
         </main>
 
