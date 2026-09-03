@@ -43,7 +43,7 @@ function Home() {
   const [running, setRunning] = useState(false);
   const [localVariables, setLocalVariables] = useState<Map<string, string>>(new Map<string, string>());
   const [visibleVar, setVisibleVar] = useState<string[]>([])
-
+  const [displayPopulated, setDisplayPopulated] = useState<boolean>(false)
 
   //Hard refresh also refreshes keys in the store display
   const refreshCloud = useCallback(async (hard: boolean) => {
@@ -59,33 +59,40 @@ function Home() {
 
 
       let keyarray = Array.from(localrecord.keys())
-
-      if ((visibleVar.length == 0) || hard) {
+      console.log("hard", hard, "populated:", displayPopulated)
+      if (hard || !displayPopulated) {
+        console.log("refreshing")
         let newvv = []
         for (let i = 0; i < 3; i++) {
-          newvv.push(keyarray[Math.floor(Math.random() * keyarray.length)])
+          newvv.push(i.toString() + keyarray[Math.floor(Math.random() * keyarray.length)])
         }
         setVisibleVar(newvv);
+        if (!displayPopulated) {
+          console.log("Settrue")
+          setDisplayPopulated(true);
+        }
       }
     }
     catch (e) {
-
     }
+  }, [getuni, displayPopulated, visibleVar]);
 
-  }, [getuni]);
+  const softRefresh = useCallback(() => {
+    refreshCloud(false);
+  }, [refreshCloud]);
 
   useEffect(() => {
-    refreshCloud(false);
-    const id = setInterval(refreshCloud, 4000);
+    softRefresh();
+    const id = setInterval(softRefresh, 4000);
     return () => clearInterval(id);
-  }, [refreshCloud]);
+  }, [softRefresh, refreshCloud]);
 
   async function handleRun() {
     setRunning(true);
     try {
       const res = await run({ data: { source: code } });
       setResult(res);
-      refreshCloud(false);
+      softRefresh();
     } catch (err) {
       setResult({
         stdout: "",
@@ -123,7 +130,7 @@ function Home() {
           result={result}
         />
 
-        <CloudPanel entries={visibleVar} onRefresh={refreshCloud} localVariables={localVariables} />
+        <CloudPanel entries={visibleVar} onRefresh={() => { refreshCloud(true) }} localVariables={localVariables} />
 
       </main>
       <Footer />
@@ -137,7 +144,7 @@ function CloudPanel({
   localVariables
 }: {
   entries: string[];
-  onRefresh: (hard: boolean) => void;
+  onRefresh: () => void;
   localVariables: Map<string, string>
 }) {
   return (
@@ -152,7 +159,7 @@ function CloudPanel({
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => { onRefresh(true) }}
+            onClick={onRefresh}
             className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             Refresh
@@ -174,7 +181,7 @@ function CloudPanel({
                 .map((e) => (
                   <li key={e} className="flex items-baseline justify-between gap-4 py-2 font-mono text-sm">
                     <span className="text-foreground">
-                      <span className="text-primary">{e}</span> = "{localVariables.get(e)}"
+                      <span className="text-primary">{e.slice(1)}</span> = "{localVariables.get(e.slice(1))}"
                     </span>
                   </li>
                 ))}
