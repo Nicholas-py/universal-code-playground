@@ -42,31 +42,40 @@ function Home() {
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
   const [localVariables, setLocalVariables] = useState<Map<string, string>>(new Map<string, string>());
-  const [displayVariables, setDisplayVariables] = useState<string[]>([]);
+  const [visibleVar, setVisibleVar] = useState<string[]>([])
 
 
-
-  const refreshCloud = useCallback(async () => {
+  //Hard refresh also refreshes keys in the store display
+  const refreshCloud = useCallback(async (hard: boolean) => {
     try {
       const res = await getuni();
 
-      let localrecord:Map<string, string> = new Map<string, string>()
+      let localrecord: Map<string, string> = new Map<string, string>()
+
       Object.keys(res.full).forEach((key) => {
         localrecord.set(key, res.full[key])
       })
       setLocalVariables(localrecord);
-    } catch (e) {
+
+
+      let keyarray = Array.from(localrecord.keys())
+
+      if ((visibleVar.length == 0) || hard) {
+        let newvv = []
+        for (let i = 0; i < 3; i++) {
+          newvv.push(keyarray[Math.floor(Math.random() * keyarray.length)])
+        }
+        setVisibleVar(newvv);
+      }
+    }
+    catch (e) {
 
     }
-    //Temporary - set display variables to shuffled version of real ones
-    setDisplayVariables(Array.from(localVariables.keys()).map(value => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value))
 
   }, [getuni]);
 
   useEffect(() => {
-    refreshCloud();
+    refreshCloud(false);
     const id = setInterval(refreshCloud, 4000);
     return () => clearInterval(id);
   }, [refreshCloud]);
@@ -76,7 +85,7 @@ function Home() {
     try {
       const res = await run({ data: { source: code } });
       setResult(res);
-      refreshCloud();
+      refreshCloud(false);
     } catch (err) {
       setResult({
         stdout: "",
@@ -114,7 +123,7 @@ function Home() {
           result={result}
         />
 
-        <CloudPanel entries={displayVariables} onRefresh={refreshCloud} localVariables={localVariables} />
+        <CloudPanel entries={visibleVar} onRefresh={refreshCloud} localVariables={localVariables} />
 
       </main>
       <Footer />
@@ -128,10 +137,9 @@ function CloudPanel({
   localVariables
 }: {
   entries: string[];
-  onRefresh: () => void;
+  onRefresh: (hard: boolean) => void;
   localVariables: Map<string, string>
 }) {
-
   return (
     <section
       className="mt-8 overflow-hidden rounded-2xl border border-border bg-card"
@@ -141,11 +149,10 @@ function CloudPanel({
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="inline-block h-2 w-2 rounded-full bg-primary" />
           <span className="font-mono">cloud · universal store</span>
-          <span className="ml-2">shared across every visitor</span>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={onRefresh}
+            onClick={() => { onRefresh(true) }}
             className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             Refresh
@@ -158,8 +165,10 @@ function CloudPanel({
             Error - store is empty.
           </p>
         ) : (
-            (<ul className="divide-y divide-border">
-              {entries
+          (<ul className="divide-y divide-border">
+            {
+              entries
+
                 //take first 3 keys
                 .slice(0, 3)
                 .map((e) => (
@@ -169,7 +178,7 @@ function CloudPanel({
                     </span>
                   </li>
                 ))}
-            </ul>)
+          </ul>)
         )}
       </div>
     </section>
@@ -193,6 +202,9 @@ export function Header() {
             href="/universal/docs"
           >
             Docs
+          </a>
+          <a className="transition-colors hover:text-foreground" href="/universal/challenges">
+            Challenges
           </a>
 
           <a
