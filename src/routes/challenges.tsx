@@ -53,27 +53,76 @@ function RouteComponent() {
                     Universal<span className="text-primary">.</span>
 
                 </h1>
-                <span className="text-primary md:text-5xl font-serif">Challenges</span>
+                <span className="text-primary md:text-5xl font-serif"></span>
             </section>
             <div className='border bg-card border-border rounded-3xl p-6 mb-6'>  {/*can consider adding border-l-22*/}
                 <section>
-                    <SectionTitle> Introduction</SectionTitle>
-                    <p className=''><Universal /> as a language aims to follow three guiding principles.</p>
-                    <ol className='ml-4'>
-                        <li className='mt-2 ml-5 -indent-4'><span className='text-primary'>1. </span><span className=''> All data should be saved to the cloud wherever possible. </span></li>
-                        <li className='mt-1 ml-6 -indent-5'><span className='text-primary'>2. </span> There should be no special characters or keywords to memorize.</li>
-                        <li className='mt-1 ml-5 -indent-4 mb-3'><span className='text-primary'>3. </span> Errors should be avoided at all costs</li>
-                    </ol>
-                    <p className='mb-5'>These principles lead naturally into the syntax and design of the language. It has a cloud database, the Universal Store, that saves
-                        all variables used in a program for future use. These variables can be literally everything - even operators like a + sign are saved to
-                        the store. In fact, in accordance with principle 2, the only forbidden characters for variable names are the = sign and whitespace.
+                    <SectionTitle> Challenges</SectionTitle>
+                    Here's a couple fun challenges to test your <Universal /> skills!
+                    <SubSection>1. Fibonacci Numbers</SubSection>
+                    Create a function that takes in a positive integer n and outputs the nth Fibonacci number.
+                    <Code>
+                        print fibonacci 3<br />
+                        print fibonacci 6<br />
+                        print fibonacci 15<br />
+                        <OPL />
+                        OUTPUT: 2<br />
+                        OUTPUT: 8<br />
+                        OUTPUT: 610
+
+                    </Code>
+                    <SubSection>2. String Splitting</SubSection>
+                    Take a string as input, and split into substrings at every instance of the character "+". Return a list of each substring.
+
+                    <Code>
+                        ex1 = stringsplit 12+13+14+15<br />
+                        print len ex1<br />
+                        print type ex2<br />
+                        print ex1<br />
+                        ex2 = stringsplit pi33pi+a<br />
+                        print len ex2<br />
+                        print ex2<OPL />
+                        OUTPUT: 4<br />
+                        OUTPUT: lzt<br />
+                        OUTPUT: 12 13 14 15<br />
+                        OUTPUT: 2<br />
+                        OUTPUT: pi33pi a<br />
+                    </Code>
+                    <SubSection>3. Prime Factorization</SubSection><p>
+                    Take in an integer and output a list of its prime factors. It may be helpful to first define an "isinteger" function
+                    and then use recursion. 
+                    <Code>
+                        primefactor 242 <br/>
+                        <OPL/>
+                        OUTPUT: 2 11 11
 
 
+                    </Code>
                     </p>
-
-                    <p><Universal /> is hosted on <Link href='https://waslander.ca'>waslander.ca</Link>. It currently
-                        has an interpreter built into the browser, which connects to the default store; at present there's no downloadable
-                        version. If you want a different setup for your use case, contact <Link href='mailto:nicholas@waslander.ca'>nicholas@waslander.ca</Link>.</p>
+                    <SubSection>4. List Sorting</SubSection>
+                    Take in a list of numbers, and then sort it using the &lt; and &gt; operators! Return the sorted list.
+                    <Code>
+                        print sort 7 1 0.2 -4 -5 18
+                        <OPL/>
+                        OUTPUT: -5 -4 0.2 1 7 18
+                    </Code>
+                    There are a couple ways to do this. The easiest is probably <Link href='https://en.wikipedia.org/wiki/Quicksort'>quicksort</Link>, with <Link href='https://en.wikipedia.org/wiki/Merge_sort'>merge sort</Link> or <Link href='https://en.wikipedia.org/wiki/Selection_sort'>selection sort</Link> also good options,
+                     but 
+                    every other sorting algorithm is doable in theory!
+                    <SubSection>5. Brainf***</SubSection>
+                    Implement an interpreter for <Link href='https://en.wikipedia.org/wiki/Brainfuck'>Brainf***</Link>. This challenge
+                    has the bonus of proving <Universal/> to be Turing-complete. For input, there are several options:
+                    <Code>brainimp [-&gt;+&lt;]</Code>
+                    <Code>[<br/>
+                        -<br/>
+                        &gt;<br/>
+                        +<br/>
+                        &lt;<br/>
+                    ]
+                    </Code>
+                    <Code>[ - &gt; + &lt; ]</Code>
+                    The first option is the safest, as it doesn't deal with overriding common operators like <ILCode>+</ILCode> or <ILCode>&lt;</ILCode>. 
+                    Simply use <ILCode>[code] get i</ILCode> to get each character from the string. For the second and third, good luck!
                 </section>
 
 
