@@ -224,7 +224,7 @@ export function Header() {
           </a>
         </nav>
         <a
-          href="#playground"
+          href="/universal/#playground"
           className="inline-flex items-center rounded-md bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
         >
           Try it
