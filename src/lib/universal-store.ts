@@ -76,6 +76,14 @@ export class UniversalStore {
         return varname.replace(/\d+$/, "");
     }
 
+    public setDefaults(defaults: any) {
+        Object.keys(defaults).forEach((key) => {
+            if (!(key in this.masterstore)) {
+                this.setValue(key, defaults[key]);
+            }
+        })
+    }
+
     async setglobal(json: StoreData) {
         await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).setFull(json.full);
         await (env.UNIVERSAL_STORE as unknown as UniversalStoreRPC).setMaster(json.master);
