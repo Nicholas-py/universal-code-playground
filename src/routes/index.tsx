@@ -329,7 +329,7 @@ function Playground({
         <div className="flex flex-col bg-secondary/30">
           <div className="flex items-center justify-between border-b border-border px-4 py-2 text-xs text-muted-foreground">
             <span className="font-mono uppercase tracking-wider">Output</span>
-            {result && (
+            { result && (
               <span className="font-mono">
               </span>
             )}
@@ -343,7 +343,7 @@ function Playground({
                 Press <span className="text-foreground">Run</span> to see output here.
               </span>
             )}
-            {result?.stdout && <span className="text-foreground">{result.stdout}</span>}
+            {result?.stdout && <span className="text-foreground">{result.stdout.length < 2000 ? result.stdout : result.stdout.slice(0,2000) + '\n...'}</span>}
             {result?.stderr && (
               <span className="text-destructive">{result.stderr}</span>
             )}

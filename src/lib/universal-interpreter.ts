@@ -114,6 +114,8 @@ export class Interpreter {
   } as const
 
   logging = true;
+  private starttime: number = 0;
+  public timedout: boolean = false;
 
   constructor(private source: string, private store: UniversalStore) { }
 
@@ -121,13 +123,28 @@ export class Interpreter {
     console.log("reset defaults")
     this.store.setDefaults(storedefaults);
     if (this.logging) { console.log('\n~~~ Run begins ~~~') }
+    this.starttime = Date.now();
+    this.timedout = false;
 
     this.interpret('\n' + this.source, "");
 
+    console.log("Timeout?", this.timedout);
+
+    //Throw again to avoid the error handling inside interpret()
+    if (this.timedout) {
+      throw new UniversalError("Code execution timeout");
+    }
   }
 
   interpret(code: string, indentedlines: string): UniversalObj {
     let lines = code.split('\n');
+
+    if (Date.now()-this.starttime > 600) {
+      this.timedout = true;
+      console.log("timeout!")
+      throw new Error("Code execution timeout");
+    }
+
 
     //Multiple lines? Run each in sequence, and return the final result (which will usually be ignored)
     if (lines.length > 1) {
