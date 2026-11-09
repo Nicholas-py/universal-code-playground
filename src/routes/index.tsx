@@ -329,7 +329,7 @@ function Playground({
         <div className="flex flex-col bg-secondary/30">
           <div className="flex items-center justify-between border-b border-border px-4 py-2 text-xs text-muted-foreground">
             <span className="font-mono uppercase tracking-wider">Output</span>
-            { result && (
+            {result && (
               <span className="font-mono">
               </span>
             )}
@@ -343,7 +343,7 @@ function Playground({
                 Press <span className="text-foreground">Run</span> to see output here.
               </span>
             )}
-            {result?.stdout && <span className="text-foreground">{result.stdout.length < 2000 ? result.stdout : result.stdout.slice(0,2000) + '\n...'}</span>}
+            {result?.stdout && <span className="text-foreground">{result.stdout.length < 2000 ? result.stdout : result.stdout.slice(0, 2000) + '\n...'}</span>}
             {result?.stderr && (
               <span className="text-destructive">{result.stderr}</span>
             )}
@@ -379,16 +379,22 @@ function PlayIcon() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/60">
+    <div>
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
-        <div className="flex items-center gap-2">
-          <Logo />
-          <span className="font-serif">Universal</span>
-          <span>·</span>
-          <span>Programming, but better.</span>
-        </div>
-        <div>© {new Date().getFullYear()} Nicholas Waslander.</div>
+        <p>AI disclaimer: AI was used for the design of this website, but not the Universal language and documentation.</p>
       </div>
-    </footer>
+      <footer className="border-t border-border/60">
+
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center">
+          <div className="flex items-center gap-2">
+            <Logo />
+            <span className="font-serif">Universal</span>
+            <span>·</span>
+            <span>Programming, but better.</span>
+          </div>
+          <div>© 2026 Nicholas Waslander.</div>
+        </div>
+      </footer>
+    </div>
   );
 }
